@@ -1,4 +1,4 @@
-export { Ship };
+export { Ship, Gameboard };
 
 class Ship {
     constructor(length, placement, type) {
@@ -54,3 +54,49 @@ class Ship {
         console.log(message);
     }
 }
+
+class Gameboard {
+    constructor() {
+        this.board = this.createBoard();
+    }
+
+    createBoard() {
+        const board = [];
+        const uppercaseLetters = [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+        ];
+
+        for (let i = 0; i < uppercaseLetters.length + 1; i++) {
+            const row = [];
+            for (let j = 0; j <= 10; j++) {
+                if (i === 0 && j === 0) {
+                    row.push("  ");
+                } else if (i === 0) {
+                    row.push(`${uppercaseLetters[j - 1]}`);
+                } else if (j === 0) {
+                    row.push(String(i).padStart(2, " ")); // Row headers (1-10) with padding
+                } else {
+                    row.push(`~`);
+                }
+            }
+            board.push(row);
+        }
+        return board;
+    }
+
+    printBoard(board) {
+        board.forEach((row) => console.log(row.join(" ")));
+    }
+}
+
+const gameboard = new Gameboard();
+gameboard.printBoard(gameboard.board);
