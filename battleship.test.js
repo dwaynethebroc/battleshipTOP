@@ -22,4 +22,10 @@ test("Ship exists", () => {
     expect(testDestroyer.damage).toBe(0);
     expect(testDestroyer.type).toBe("destroyer");
     expect(testDestroyer.hit("A2")).toBe(true);
+    expect(testDestroyer.hit("B4")).toBe(false);
+
+    testDestroyer.targetedSquares = ["A2", "A3", "A4", "A5", "A6"];
+
+    expect(testDestroyer.isSunk()).toBe(true);
+    expect(testDestroyer.sunk).toBe(true);
 });
