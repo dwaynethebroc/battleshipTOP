@@ -131,8 +131,12 @@ class Gameboard {
                 startingCoordinate,
                 endCoordinate,
                 this.board,
-                ship.type,
+                ship,
             );
+
+            console.log("finished changing board");
+
+            this.printBoard(this.board);
         });
     }
 
@@ -164,44 +168,50 @@ class Gameboard {
         if (rowStart === rowEnd) {
             console.log("horizontal");
 
+            //length of boat
             const boatLength = columnEnd - columnStart;
 
             console.log(boatLength);
 
+            //find row in array and save index
             const rowLetter = uppercaseLetters.find(
                 (element) => element === rowStart,
             );
-            const rowIndex = uppercaseLetters.findIndex(rowLetter);
+            const rowIndex = uppercaseLetters.indexOf(rowLetter);
 
             console.log(rowIndex);
 
+            //change cells the ship will occupy to the starting letter of the ship
             for (let i = columnStart; i <= columnEnd; i++) {
                 //edit each cell of the corresponding row and column between beginning and end row
-                board[rowIndex][i] = ship.slice(0, 1).toUpperCase();
+                board[rowIndex][i] = ship.type.slice(0, 1).toUpperCase();
             }
         } else if (columnStart === columnEnd) {
             console.log("vertical");
 
+            //find index of starting letter
             const rowLetterStart = uppercaseLetters.find(
                 (element) => element === rowStart,
             );
-            const rowIndexStart = uppercaseLetters.findIndex(rowLetterStart);
+            const rowIndexStart = uppercaseLetters.indexOf(rowLetterStart);
 
+            //find index of ending letter
             const rowLetterEnd = uppercaseLetters.find(
                 (element) => element === rowEnd,
             );
 
-            const rowIndexEnd = uppercaseLetters.findIndex(rowLetterEnd);
+            const rowIndexEnd = uppercaseLetters.indexOf(rowLetterEnd);
 
+            //find boat length from beginning and end
             const boatLength = rowIndexEnd - rowIndexStart;
 
             console.log(boatLength);
 
-            console.log(rowIndexStart);
+            console.log(columnStart);
 
             for (let i = rowIndexStart; i <= rowIndexEnd; i++) {
                 //edit each cell of the corresponding row and column between beginning and end row
-                board[i][columnStart] = ship.slice(0, 1).toUpperCase();
+                board[i][columnStart] = ship.type.slice(0, 1).toUpperCase();
             }
         }
     }
