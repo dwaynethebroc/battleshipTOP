@@ -127,11 +127,84 @@ class Gameboard {
             // console.log("Starting coordinate " + startingCoordinate);
             // console.log("Ending coordinate " + endCoordinate);
 
-            changeBoard(startingCoordinate, endCoordinate);
+            this.changeBoard(
+                startingCoordinate,
+                endCoordinate,
+                this.board,
+                ship.type,
+            );
         });
     }
 
-    changeBoard() {}
+    changeBoard(startCoords, endCoords, board, ship) {
+        const rowStart = startCoords.slice(0, 1);
+        const rowEnd = endCoords.slice(0, 1);
+        const columnStart = Number(startCoords.slice(1));
+        const columnEnd = Number(endCoords.slice(1));
+
+        const uppercaseLetters = [
+            " ",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+        ];
+
+        console.log(rowStart);
+        console.log(rowEnd);
+        console.log(columnStart);
+        console.log(columnEnd);
+
+        if (rowStart === rowEnd) {
+            console.log("horizontal");
+
+            const boatLength = columnEnd - columnStart;
+
+            console.log(boatLength);
+
+            const rowLetter = uppercaseLetters.find(
+                (element) => element === rowStart,
+            );
+            const rowIndex = uppercaseLetters.findIndex(rowLetter);
+
+            console.log(rowIndex);
+
+            for (let i = columnStart; i <= columnEnd; i++) {
+                //edit each cell of the corresponding row and column between beginning and end row
+                board[rowIndex][i] = ship.slice(0, 1).toUpperCase();
+            }
+        } else if (columnStart === columnEnd) {
+            console.log("vertical");
+
+            const rowLetterStart = uppercaseLetters.find(
+                (element) => element === rowStart,
+            );
+            const rowIndexStart = uppercaseLetters.findIndex(rowLetterStart);
+
+            const rowLetterEnd = uppercaseLetters.find(
+                (element) => element === rowEnd,
+            );
+
+            const rowIndexEnd = uppercaseLetters.findIndex(rowLetterEnd);
+
+            const boatLength = rowIndexEnd - rowIndexStart;
+
+            console.log(boatLength);
+
+            console.log(rowIndexStart);
+
+            for (let i = rowIndexStart; i <= rowIndexEnd; i++) {
+                //edit each cell of the corresponding row and column between beginning and end row
+                board[i][columnStart] = ship.slice(0, 1).toUpperCase();
+            }
+        }
+    }
 }
 
 const gameboard = new Gameboard();
