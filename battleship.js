@@ -127,7 +127,21 @@ class Gameboard {
 
             let match = shipPlacement.match(coordinateRegex);
 
+            const boatLength = Number(match[4]) - Number(match[2]);
+            let lengthsMatch = false;
+
+            if (boatLength === ship.length) {
+                lengthsMatch = true;
+            }
+
             while (!match) {
+                if (lengthsMatch === false) {
+                    console.error(
+                        `You're coordinates are the incorrect length. \n
+                  Your coordinate lenght: ${boatLength}\n
+                  Boat length: ${ship.length}\n`,
+                    );
+                }
                 console.error(
                     "Invalid coordinate format. Please use the format 'A2-A5'.",
                 );
@@ -304,9 +318,6 @@ class Gameboard {
 
         if (columnStart === columnEnd) {
             console.log("vertical");
-
-            // Boat length
-            const boatLength = rowEnd - rowStart;
 
             // Find column index
             const columnIndex = uppercaseLetters.indexOf(columnStart);
