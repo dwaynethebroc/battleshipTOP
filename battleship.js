@@ -184,7 +184,7 @@ class Gameboard {
             //change cells the ship will occupy to the starting letter of the ship
             for (let i = columnStart; i <= columnEnd; i++) {
                 //edit each cell of the corresponding row and column between beginning and end row
-                board[rowIndex][i] = ship.type.slice(0, 1).toUpperCase();
+                board[i][rowIndex] = ship.type.slice(0, 1).toUpperCase();
             }
         } else if (columnStart === columnEnd) {
             console.log("vertical");
@@ -211,7 +211,7 @@ class Gameboard {
 
             for (let i = rowIndexStart; i <= rowIndexEnd; i++) {
                 //edit each cell of the corresponding row and column between beginning and end row
-                board[i][columnStart] = ship.type.slice(0, 1).toUpperCase();
+                board[columnStart][i] = ship.type.slice(0, 1).toUpperCase();
             }
         }
     }
