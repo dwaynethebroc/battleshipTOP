@@ -96,6 +96,8 @@ class Gameboard {
     printBoard(board) {
         board.forEach((row) => console.log(row.join(" ")));
     }
+
+    placeShip(shipSize, coordinate) {}
 }
 
 const gameboard = new Gameboard();
