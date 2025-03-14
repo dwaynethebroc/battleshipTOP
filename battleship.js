@@ -1,4 +1,7 @@
 export { Ship, Gameboard };
+import promptSync from "prompt-sync";
+
+const prompt = promptSync();
 
 class Ship {
     constructor(length, placement, type) {
@@ -97,8 +100,39 @@ class Gameboard {
         board.forEach((row) => console.log(row.join(" ")));
     }
 
-    placeShip(shipSize, coordinate) {}
+    placeShip() {
+        const shipTypes = [
+            { length: 2, type: "patrol" },
+            { length: 3, type: "submarine" },
+            { length: 3, type: "destroyer" },
+            { length: 4, type: "battleship" },
+            { length: 5, type: "carrier" },
+        ];
+        const shipCoordinates = [];
+
+        shipTypes.forEach((ship) => {
+            this.printBoard(this.board);
+
+            console.log(
+                `Enter coordinates for \nship type: ${ship.type.toUpperCase()}\nlength: ${ship.length}\n(Provide ${ship.length} grid coordinates in the format { {startingCoordinate}-{endCoordinate} such as: (A2-A3))\n`,
+            );
+
+            const shipPlacement = prompt("Enter your coordinate: ");
+
+            console.log(`\n Your answer is: "${shipPlacement}" \n`);
+
+            const startingCoordinate = shipPlacement.slice(0, 2);
+            const endCoordinate = shipPlacement.slice(-2);
+
+            // console.log("Starting coordinate " + startingCoordinate);
+            // console.log("Ending coordinate " + endCoordinate);
+
+            changeBoard(startingCoordinate, endCoordinate);
+        });
+    }
+
+    changeBoard() {}
 }
 
 const gameboard = new Gameboard();
-gameboard.printBoard(gameboard.board);
+gameboard.placeShip();
