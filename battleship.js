@@ -119,19 +119,22 @@ class Gameboard {
                 `Enter coordinates for \nship type: ${ship.type.toUpperCase()}\nlength: ${ship.length}\n(Provide ${ship.length} grid coordinates in the format {startingCoordinate}-{endCoordinate}, such as: A2-A5)\n`,
             );
 
-            const shipPlacement = prompt("Enter your coordinate: ")
+            let shipPlacement = prompt("Enter your coordinate: ")
                 .trim()
                 .toUpperCase();
 
             console.log(`\n Your answer is: "${shipPlacement}" \n`);
 
-            const match = shipPlacement.match(coordinateRegex);
+            let match = shipPlacement.match(coordinateRegex);
 
-            if (!match) {
+            while (!match) {
                 console.error(
-                    "Invalid coordinate format. Please use the format A2-A5.",
+                    "Invalid coordinate format. Please use the format 'A2-A5'.",
                 );
-                return;
+
+                shipPlacement = prompt("Enter your coordinate: ")
+                    .trim()
+                    .toUpperCase();
             }
 
             const startingCoordinate = match[1] + match[2]; // e.g., "A2"
