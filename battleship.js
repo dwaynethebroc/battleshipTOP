@@ -102,6 +102,7 @@ class Gameboard {
     }
 
     placeShip() {
+        this.printBoard(this.board);
         const shipTypes = [
             { length: 2, type: "patrol" },
             { length: 3, type: "submarine" },
@@ -131,19 +132,26 @@ class Gameboard {
                 ship.length,
             );
 
-            if (lengthsMatch === false) {
-                console.error(
-                    `You're coordinates are the incorrect length. \n
-            Your coordinate lenght: ${boatLength}\n
-            Boat length: ${ship.length}\n`,
-                );
-            }
+            while (!match || !lengthsMatch || match === null) {
+                this.printBoard(this.board);
 
-            while (!match || !lengthsMatch) {
-                console.error(
-                    "Invalid coordinate format. Please use the format 'A2-A5'.",
-                );
-
+                if (!match || match === null) {
+                    console.error(
+                        "Invalid coordinate format. Please use the format 'A2-A5'.",
+                    );
+                } else if (!lengthsMatch) {
+                    console.error(
+                        `You're coordinates are the incorrect length.\nYour coordinate length: ${boatLength}\nBoat length: ${ship.length}\n`,
+                    );
+                } else if (
+                    !lengthsMatch &&
+                    match[1] != match[3] &&
+                    match[2] != match[4]
+                ) {
+                    console.error(
+                        `It's not possible to place pieces diagonally`,
+                    );
+                }
                 shipPlacement = this.promptShip(ship);
 
                 match = shipPlacement.match(coordinateRegex);
@@ -306,7 +314,7 @@ class Gameboard {
 
     promptShip(ship) {
         console.log(
-            `Enter coordinates for \nship type: ${ship.type.toUpperCase()}\nlength: ${ship.length}\n(Provide ${ship.length} grid coordinates in the format {startingCoordinate}-{endCoordinate}, such as: A2-A5)\n`,
+            `Enter coordinates for \nship type: ${ship.type.toUpperCase()}, length: ${ship.length}\n(Provide ${ship.length} grid coordinates in the format {startingCoordinate}-{endCoordinate}, such as: A2-A5)\n`,
         );
 
         let shipPlacement = prompt("Enter your coordinate: ")
@@ -317,6 +325,8 @@ class Gameboard {
 
         return shipPlacement;
     }
+
+    errorMessage(match, length) {}
 }
 
 const gameboard = new Gameboard();
