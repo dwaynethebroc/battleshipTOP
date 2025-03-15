@@ -113,8 +113,10 @@ class Gameboard {
         const coordinateRegex = /^([A-Z]+)(\d+)-([A-Z]+)(\d+)$/; // Matches format "A2-A5"
 
         shipTypes.forEach((ship) => {
-            let shipPlacement = this.promptShip();
+            let shipPlacement = this.promptShip(ship);
             let match = shipPlacement.match(coordinateRegex);
+
+            console.log(`Match? : ${match}`);
 
             let startingCoordinate = match[1] + match[2]; // e.g., "A2"
             let endCoordinate = match[3] + match[4]; // e.g., "A5"
@@ -129,36 +131,36 @@ class Gameboard {
                 ship.length,
             );
 
-            while (!match && !lengthsMatch) {
-                if (lengthsMatch === false) {
-                    console.error(
-                        `You're coordinates are the incorrect length. \n
-                  Your coordinate lenght: ${boatLength}\n
-                  Boat length: ${ship.length}\n`,
-                    );
-                }
+            if (lengthsMatch === false) {
+                console.error(
+                    `You're coordinates are the incorrect length. \n
+            Your coordinate lenght: ${boatLength}\n
+            Boat length: ${ship.length}\n`,
+                );
+            }
+
+            while (!match || !lengthsMatch) {
                 console.error(
                     "Invalid coordinate format. Please use the format 'A2-A5'.",
                 );
 
-                shipPlacement = this.promptShip();
+                shipPlacement = this.promptShip(ship);
 
                 match = shipPlacement.match(coordinateRegex);
 
                 startingCoordinate = match[1] + match[2]; // e.g., "A2"
                 endCoordinate = match[3] + match[4]; // e.g., "A5"
 
-                let boatLength = this.lengthOfBoat(
+                boatLength = this.lengthOfBoat(
                     startingCoordinate,
                     endCoordinate,
                 );
 
-                let lengthsMatch = this.boatLengthEqualsShipType(
+                lengthsMatch = this.boatLengthEqualsShipType(
                     boatLength,
                     ship.length,
                 );
             }
-
             console.log("Starting coordinate: " + startingCoordinate);
             console.log("Ending coordinate: " + endCoordinate);
 
@@ -177,6 +179,7 @@ class Gameboard {
                     orientation,
                 ),
             );
+            this.printBoard(this.board);
         });
     }
 
@@ -194,6 +197,8 @@ class Gameboard {
         const rowStart = Number(matchStart[2]); // Number part (Rows)
         const rowEnd = Number(matchEnd[2]);
 
+        let orientation = "";
+
         const uppercaseLetters = [
             " ",
             "A",
@@ -208,10 +213,8 @@ class Gameboard {
             "J",
         ];
 
-        console.log(columnStart, columnEnd, rowStart, rowEnd);
-
         if (columnStart === columnEnd) {
-            console.log("vertical");
+            orientation = "vertical";
 
             // Find column index
             const columnIndex = uppercaseLetters.indexOf(columnStart);
@@ -222,10 +225,8 @@ class Gameboard {
             for (let i = rowStart; i <= rowEnd; i++) {
                 board[i][columnIndex] = ship.type.slice(0, 1).toUpperCase();
             }
-
-            return "vertical";
         } else if (rowStart === rowEnd) {
-            console.log("horizontal");
+            orientation = "horizontal";
 
             // Find column indexes
             const columnIndexStart = uppercaseLetters.indexOf(columnStart);
@@ -237,9 +238,8 @@ class Gameboard {
             for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
                 board[rowStart][i] = ship.type.slice(0, 1).toUpperCase();
             }
-
-            return "horizontal";
         }
+        return orientation;
     }
 
     lengthOfBoat(startCoords, endCoords) {
@@ -265,14 +265,18 @@ class Gameboard {
         const rowStart = Number(matchStart[2]); // Number part (Rows)
         const rowEnd = Number(matchEnd[2]);
 
+        console.log(columnStart, columnEnd, rowStart, rowEnd);
+
         let boatLength = 0;
 
         if (columnStart === columnEnd) {
-            console.log("horizontal");
-
-            boatLength = rowEnd - rowStart;
-        } else if (rowStart === rowEnd) {
             console.log("vertical");
+
+            for (let i = rowStart; i <= rowEnd; i++) {
+                boatLength++;
+            }
+        } else if (rowStart === rowEnd) {
+            console.log("horizontal");
 
             // Find column indexes
             const columnIndexStart = uppercaseLetters.indexOf(columnStart);
@@ -280,23 +284,27 @@ class Gameboard {
 
             console.log("Column indexes:", columnIndexStart, columnIndexEnd);
 
-            boatLength = columnIndexEnd - columnIndexStart;
+            for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
+                boatLength++;
+            }
         }
 
+        console.log("boat length:", boatLength);
         return boatLength;
     }
 
-    boatLengthEqualsShipType(boatLength, shipType) {
-        if (boatLength === shipType) {
+    boatLengthEqualsShipType(boatLength, shipTypeLength) {
+        console.log(
+            `boat length: ${boatLength}, ship length: ${shipTypeLength}`,
+        );
+        if (boatLength === shipTypeLength) {
             return true;
         } else {
             return false;
         }
     }
 
-    promptShip() {
-        this.printBoard(this.board);
-
+    promptShip(ship) {
         console.log(
             `Enter coordinates for \nship type: ${ship.type.toUpperCase()}\nlength: ${ship.length}\n(Provide ${ship.length} grid coordinates in the format {startingCoordinate}-{endCoordinate}, such as: A2-A5)\n`,
         );
@@ -313,3 +321,4 @@ class Gameboard {
 
 const gameboard = new Gameboard();
 gameboard.placeShip();
+console.log(gameboard.ships);
