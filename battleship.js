@@ -63,6 +63,19 @@ class Gameboard {
         this.board = this.createBoard();
         this.ships = [];
         this.occupiedCells = [];
+        this.uppercaseLetters = [
+            " ",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+        ];
     }
 
     createBoard() {
@@ -229,64 +242,40 @@ class Gameboard {
 
         const placement = [];
 
-        const uppercaseLetters = [
-            " ",
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-        ];
-
         if (columnStart === columnEnd) {
             // Find column index
-            const columnIndex = uppercaseLetters.indexOf(columnStart);
+            const columnIndex = this.uppercaseLetters.indexOf(columnStart);
 
             console.log("Column index:", columnIndex);
 
             // Change board cells for vertical placement
             for (let i = rowStart; i <= rowEnd; i++) {
                 board[i][columnIndex] = ship.type.slice(0, 1).toUpperCase();
-                this.occupiedCells.push(`${uppercaseLetters[columnIndex]}${i}`);
-                placement.push(`${uppercaseLetters[columnIndex]}${i}`);
+                this.occupiedCells.push(
+                    `${this.uppercaseLetters[columnIndex]}${i}`,
+                );
+                placement.push(`${this.uppercaseLetters[columnIndex]}${i}`);
             }
         } else if (rowStart === rowEnd) {
             // Find column indexes
-            const columnIndexStart = uppercaseLetters.indexOf(columnStart);
-            const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
+            const columnIndexStart = this.uppercaseLetters.indexOf(columnStart);
+            const columnIndexEnd = this.uppercaseLetters.indexOf(columnEnd);
 
             console.log("Column indexes:", columnIndexStart, columnIndexEnd);
 
             // Change board cells for horizontal placement
             for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
                 board[rowStart][i] = ship.type.slice(0, 1).toUpperCase();
-                this.occupiedCells.push(`${uppercaseLetters[i]}${rowStart}`);
-                placement.push(`${uppercaseLetters[i]}${rowStart}`);
+                this.occupiedCells.push(
+                    `${this.uppercaseLetters[i]}${rowStart}`,
+                );
+                placement.push(`${this.uppercaseLetters[i]}${rowStart}`);
             }
         }
         return placement;
     }
 
     lengthOfBoat(startCoords, endCoords) {
-        const uppercaseLetters = [
-            " ",
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-        ];
-
         const matchStart = startCoords.match(/^([A-Z]+)(\d+)$/);
         const matchEnd = endCoords.match(/^([A-Z]+)(\d+)$/);
 
@@ -298,8 +287,8 @@ class Gameboard {
         console.log(columnStart, columnEnd, rowStart, rowEnd);
 
         // Find column indexes
-        const columnIndexStart = uppercaseLetters.indexOf(columnStart);
-        const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
+        const columnIndexStart = this.uppercaseLetters.indexOf(columnStart);
+        const columnIndexEnd = this.uppercaseLetters.indexOf(columnEnd);
 
         let boatLength = 0;
 
@@ -388,20 +377,6 @@ class Gameboard {
     }
 
     outOfBounds(boatLength, startCoords, endCoords) {
-        const uppercaseLetters = [
-            " ",
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-        ];
-
         const matchStart = startCoords.match(/^([A-Z]+)(\d+)$/);
         const matchEnd = endCoords.match(/^([A-Z]+)(\d+)$/);
 
@@ -411,8 +386,8 @@ class Gameboard {
         const rowEnd = Number(matchEnd[2]);
 
         // Find column indexes
-        const columnIndexStart = uppercaseLetters.indexOf(columnStart);
-        const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
+        const columnIndexStart = this.uppercaseLetters.indexOf(columnStart);
+        const columnIndexEnd = this.uppercaseLetters.indexOf(columnEnd);
 
         if (columnStart === columnEnd) {
             if (rowStart + boatLength <= 11 && rowStart > 0) {
@@ -422,7 +397,7 @@ class Gameboard {
             }
         } else if (rowStart === rowEnd) {
             if (
-                columnIndexStart + boatLength <= uppercaseLetters.length &&
+                columnIndexStart + boatLength <= this.uppercaseLetters.length &&
                 columnIndexStart > 0
             ) {
                 return false;
@@ -433,20 +408,6 @@ class Gameboard {
     }
 
     orientation(startCoords, endCoords) {
-        const uppercaseLetters = [
-            " ",
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-        ];
-
         const matchStart = startCoords.match(/^([A-Z]+)(\d+)$/);
         const matchEnd = endCoords.match(/^([A-Z]+)(\d+)$/);
 
@@ -455,8 +416,8 @@ class Gameboard {
         const rowStart = Number(matchStart[2]); // Number part (Rows)
         const rowEnd = Number(matchEnd[2]);
 
-        const columnIndexStart = uppercaseLetters.indexOf(columnStart);
-        const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
+        const columnIndexStart = this.uppercaseLetters.indexOf(columnStart);
+        const columnIndexEnd = this.uppercaseLetters.indexOf(columnEnd);
 
         if (columnStart === columnEnd) {
             return "vertical";
@@ -478,36 +439,22 @@ class Gameboard {
 
         const placement = [];
 
-        const uppercaseLetters = [
-            " ",
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-        ];
-
         if (columnStart === columnEnd) {
             // Find column index
-            const columnIndex = uppercaseLetters.indexOf(columnStart);
+            const columnIndex = this.uppercaseLetters.indexOf(columnStart);
 
             // Push coordinates of gridpoint to placement array
             for (let i = rowStart; i <= rowEnd; i++) {
-                placement.push(`${uppercaseLetters[columnIndex]}${i}`);
+                placement.push(`${this.uppercaseLetters[columnIndex]}${i}`);
             }
         } else if (rowStart === rowEnd) {
             // Find column indexes
-            const columnIndexStart = uppercaseLetters.indexOf(columnStart);
-            const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
+            const columnIndexStart = this.uppercaseLetters.indexOf(columnStart);
+            const columnIndexEnd = this.uppercaseLetters.indexOf(columnEnd);
 
             // Push coordinates of gridpoint to placement array
             for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
-                placement.push(`${uppercaseLetters[i]}${rowStart}`);
+                placement.push(`${this.uppercaseLetters[i]}${rowStart}`);
             }
         }
 
