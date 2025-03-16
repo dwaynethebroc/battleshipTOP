@@ -117,6 +117,12 @@ class Gameboard {
             let shipPlacement = this.promptShip(ship);
             let match = shipPlacement.match(coordinateRegex);
 
+            while (!match || shipPlacement === "") {
+                this.printBoard(this.board);
+                shipPlacement = this.promptShip(ship);
+                match = shipPlacement.match(coordinateRegex);
+            }
+
             console.log(`Match? : ${match}`);
 
             let startingCoordinate = match[1] + match[2]; // e.g., "A2"
@@ -132,26 +138,11 @@ class Gameboard {
                 ship.length,
             );
 
-            while (!match || !lengthsMatch || match === null) {
+            while (!lengthsMatch) {
                 this.printBoard(this.board);
 
-                if (!match || match === null) {
-                    console.error(
-                        "Invalid coordinate format. Please use the format 'A2-A5'.",
-                    );
-                } else if (!lengthsMatch) {
-                    console.error(
-                        `You're coordinates are the incorrect length.\nYour coordinate length: ${boatLength}\nBoat length: ${ship.length}\n`,
-                    );
-                } else if (
-                    !lengthsMatch &&
-                    match[1] != match[3] &&
-                    match[2] != match[4]
-                ) {
-                    console.error(
-                        `It's not possible to place pieces diagonally`,
-                    );
-                }
+                this.errorMessage(match, lengthsMatch, boatLength, ship.length);
+
                 shipPlacement = this.promptShip(ship);
 
                 match = shipPlacement.match(coordinateRegex);
@@ -275,6 +266,10 @@ class Gameboard {
 
         console.log(columnStart, columnEnd, rowStart, rowEnd);
 
+        // Find column indexes
+        const columnIndexStart = uppercaseLetters.indexOf(columnStart);
+        const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
+
         let boatLength = 0;
 
         if (columnStart === columnEnd) {
@@ -286,13 +281,15 @@ class Gameboard {
         } else if (rowStart === rowEnd) {
             console.log("horizontal");
 
-            // Find column indexes
-            const columnIndexStart = uppercaseLetters.indexOf(columnStart);
-            const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
-
             console.log("Column indexes:", columnIndexStart, columnIndexEnd);
 
             for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
+                boatLength++;
+            }
+        } else if (rowEnd > rowStart && columnIndexEnd > columnIndexStart) {
+            console.log("diagonal");
+
+            for (let i = rowStart; i <= rowEnd; i++) {
                 boatLength++;
             }
         }
@@ -326,7 +323,23 @@ class Gameboard {
         return shipPlacement;
     }
 
-    errorMessage(match, length) {}
+    errorMessage(match, length, userInput, shipLength) {
+        if (!length && match[1] != match[3] && match[2] != match[4]) {
+            console.error(`It's not possible to place pieces diagonally`);
+        } else if (Number(match[4]) < Number(match[2])) {
+            console.error(
+                "Make sure to place ships with coordinates Left to Right, Top to Bottom",
+            );
+        } else if (!match || match === null) {
+            console.error(
+                "Invalid coordinate format. Please use the format 'A2-A5'.",
+            );
+        } else if (!length) {
+            console.error(
+                `You're coordinates are the incorrect length.\nYour coordinate length: ${userInput}\nBoat length: ${shipLength}\n`,
+            );
+        }
+    }
 }
 
 const gameboard = new Gameboard();
