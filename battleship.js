@@ -138,10 +138,22 @@ class Gameboard {
                 ship.length,
             );
 
-            while (!lengthsMatch) {
+            let outOfBounds = this.outOfBounds(
+                boatLength,
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            while (!lengthsMatch || outOfBounds) {
                 this.printBoard(this.board);
 
-                this.errorMessage(match, lengthsMatch, boatLength, ship.length);
+                this.errorMessage(
+                    match,
+                    lengthsMatch,
+                    boatLength,
+                    ship.length,
+                    outOfBounds,
+                );
 
                 shipPlacement = this.promptShip(ship);
 
@@ -158,6 +170,12 @@ class Gameboard {
                 lengthsMatch = this.boatLengthEqualsShipType(
                     boatLength,
                     ship.length,
+                );
+
+                outOfBounds = this.outOfBounds(
+                    boatLength,
+                    startingCoordinate,
+                    endCoordinate,
                 );
             }
             console.log("Starting coordinate: " + startingCoordinate);
@@ -323,7 +341,7 @@ class Gameboard {
         return shipPlacement;
     }
 
-    errorMessage(match, length, userInput, shipLength) {
+    errorMessage(match, length, userInput, shipLength, outOfBounds) {
         if (!length && match[1] != match[3] && match[2] != match[4]) {
             console.error(`It's not possible to place pieces diagonally`);
         } else if (Number(match[4]) < Number(match[2])) {
@@ -338,6 +356,49 @@ class Gameboard {
             console.error(
                 `You're coordinates are the incorrect length.\nYour coordinate length: ${userInput}\nBoat length: ${shipLength}\n`,
             );
+        } else if (outOfBounds) {
+            console.error(
+                `You're coordinates are out of the bounds of the grid. Pick gridpoints between A-J and 1-10`,
+            );
+        }
+    }
+
+    outOfBounds(boatLength, startCoords, endCoords) {
+        const uppercaseLetters = [
+            " ",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+        ];
+
+        const matchStart = startCoords.match(/^([A-Z]+)(\d+)$/);
+        const matchEnd = endCoords.match(/^([A-Z]+)(\d+)$/);
+
+        const columnStart = matchStart[1]; // Letter part (Columns)
+        const columnEnd = matchEnd[1];
+        const rowStart = Number(matchStart[2]); // Number part (Rows)
+        const rowEnd = Number(matchEnd[2]);
+
+        const columnIndexStart = uppercaseLetters.indexOf(columnStart);
+        const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
+
+        if (columnIndexEnd + boatLength > uppercaseLetters.length) {
+            return true;
+        } else if (rowEnd + boatLength > 10) {
+            return true;
+        } else if (columnIndexStart < 1) {
+            return true;
+        } else if (rowStart < 1) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
