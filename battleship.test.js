@@ -74,54 +74,53 @@ test("has correct column headers", () => {
 });
 
 //Mock ship placement
-// //[
+// [
 //     Ship {
-//         damage: 0,
-//         sunk: false,
-//         length: 2,
-//         placement: 'A2-A3',
-//         type: 'patrol',
-//         orientation: 'vertical'
-//       },
-//       Ship {
-//         damage: 0,
-//         sunk: false,
-//         length: 3,
-//         placement: 'B3-D3',
-//         type: 'submarine',
-//         orientation: 'horizontal'
-//       },
-//       Ship {
-//         damage: 0,
-//         sunk: false,
-//         length: 3,
-//         placement: 'D4-D6',
-//         type: 'destroyer',
-//         orientation: 'vertical'
-//       },
-//       Ship {
-//         damage: 0,
-//         sunk: false,
-//         length: 4,
-//         placement: 'D7-G7',
-//         type: 'battleship',
-//         orientation: 'horizontal'
-//       },
-//       Ship {
-//         damage: 0,
-//         sunk: false,
-//         length: 5,
-//         placement: 'C6-C10',
-//         type: 'carrier',
-//         orientation: 'vertical'
-//       }
-//     ]
-
-// Occupied Cells test array
-//     [
-//       'A2',  'A3', 'B3', 'C3',
-//       'D3',  'D4', 'D5', 'D6',
-//       'D7',  'E7', 'F7', 'G7',
-//       'C6',  'C7', 'C8', 'C9',
-//       'C10'
-//     ]
+//       damage: 0,
+//       sunk: false,
+//       length: 2,
+//       placement: [ 'A9', 'A10' ],
+//       type: 'patrol',
+//       orientation: 'vertical'
+//     },
+//     Ship {
+//       damage: 0,
+//       sunk: false,
+//       length: 3,
+//       placement: [ 'H10', 'I10', 'J10' ],
+//       type: 'submarine',
+//       orientation: 'horizontal'
+//     },
+//     Ship {
+//       damage: 0,
+//       sunk: false,
+//       length: 3,
+//       placement: [ 'H1', 'I1', 'J1' ],
+//       type: 'destroyer',
+//       orientation: 'horizontal'
+//     },
+//     Ship {
+//       damage: 0,
+//       sunk: false,
+//       length: 4,
+//       placement: [ 'A1', 'A2', 'A3', 'A4' ],
+//       type: 'battleship',
+//       orientation: 'vertical'
+//     },
+//     Ship {
+//       damage: 0,
+//       sunk: false,
+//       length: 5,
+//       placement: [ 'C6', 'D6', 'E6', 'F6', 'G6' ],
+//       type: 'carrier',
+//       orientation: 'horizontal'
+//     }
+//   ]
+//Mock array of occupied cells
+//   [
+//     'A9',  'A10', 'H10', 'I10',
+//     'J10', 'H1',  'I1',  'J1',
+//     'A1',  'A2',  'A3',  'A4',
+//     'C6',  'D6',  'E6',  'F6',
+//     'G6'
+//   ]

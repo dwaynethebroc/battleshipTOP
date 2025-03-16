@@ -148,7 +148,7 @@ class Gameboard {
             let alreadyPlaced = this.alreadyPlaced(
                 startingCoordinate,
                 endCoordinate,
-            )
+            );
 
             while (!lengthsMatch || outOfBounds || alreadyPlaced) {
                 this.printBoard(this.board);
@@ -159,7 +159,7 @@ class Gameboard {
                     boatLength,
                     ship.length,
                     outOfBounds,
-                    alreadyPlaced
+                    alreadyPlaced,
                 );
 
                 shipPlacement = this.promptShip(ship);
@@ -184,15 +184,21 @@ class Gameboard {
                     startingCoordinate,
                     endCoordinate,
                 );
+
+                alreadyPlaced = this.alreadyPlaced(
+                    startingCoordinate,
+                    endCoordinate,
+                );
             }
-            
-            console.log(
-                "Starting coordinate: " + startingCoordinate,
-            );
+
+            console.log("Starting coordinate: " + startingCoordinate);
             console.log("Ending coordinate: " + endCoordinate);
 
-            const orientation = this.orientation(startingCoordinate, endCoordinate)
-            
+            let orientation = this.orientation(
+                startingCoordinate,
+                endCoordinate,
+            );
+
             const placement = this.changeBoard(
                 startingCoordinate,
                 endCoordinate,
@@ -201,12 +207,7 @@ class Gameboard {
             );
 
             this.ships.push(
-                new Ship(
-                    boatLength,
-                    placement,
-                    ship.type,
-                    orientation,
-                ),
+                new Ship(boatLength, placement, ship.type, orientation),
             );
             this.printBoard(this.board);
         });
@@ -252,10 +253,9 @@ class Gameboard {
             for (let i = rowStart; i <= rowEnd; i++) {
                 board[i][columnIndex] = ship.type.slice(0, 1).toUpperCase();
                 this.occupiedCells.push(`${uppercaseLetters[columnIndex]}${i}`);
-                placement.push(`${uppercaseLetters[columnIndex]}${i}`)
+                placement.push(`${uppercaseLetters[columnIndex]}${i}`);
             }
         } else if (rowStart === rowEnd) {
-
             // Find column indexes
             const columnIndexStart = uppercaseLetters.indexOf(columnStart);
             const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
@@ -266,7 +266,7 @@ class Gameboard {
             for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
                 board[rowStart][i] = ship.type.slice(0, 1).toUpperCase();
                 this.occupiedCells.push(`${uppercaseLetters[i]}${rowStart}`);
-                placement.push(`${uppercaseLetters[i]}${rowStart}`)
+                placement.push(`${uppercaseLetters[i]}${rowStart}`);
             }
         }
         return placement;
@@ -354,7 +354,14 @@ class Gameboard {
         return shipPlacement;
     }
 
-    errorMessage(match, length, userInput, shipLength, outOfBounds, alreadyPlaced) {
+    errorMessage(
+        match,
+        length,
+        userInput,
+        shipLength,
+        outOfBounds,
+        alreadyPlaced,
+    ) {
         if (!length && match[1] != match[3] && match[2] != match[4]) {
             console.error(`It's not possible to place pieces diagonally`);
         } else if (Number(match[4]) < Number(match[2])) {
@@ -399,24 +406,33 @@ class Gameboard {
         const matchEnd = endCoords.match(/^([A-Z]+)(\d+)$/);
 
         const columnStart = matchStart[1]; // Letter part (Columns)
+        const columnEnd = matchEnd[1];
         const rowStart = Number(matchStart[2]); // Number part (Rows)
+        const rowEnd = Number(matchEnd[2]);
 
+        // Find column indexes
         const columnIndexStart = uppercaseLetters.indexOf(columnStart);
+        const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
 
-        if (columnIndexStart + boatLength > uppercaseLetters.length) {
-            return true;
-        } else if (rowStart + boatLength > 11) {
-            return true;
-        } else if (columnIndexStart < 1) {
-            return true;
-        } else if (rowStart < 1) {
-            return true;
-        } else {
-            return false;
+        if (columnStart === columnEnd) {
+            if (rowStart + boatLength <= 11 && rowStart > 0) {
+                return false;
+            } else {
+                return true;
+            }
+        } else if (rowStart === rowEnd) {
+            if (
+                columnIndexStart + boatLength <= uppercaseLetters.length &&
+                columnIndexStart > 0
+            ) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 
-    orientation(startCoords, endCoords){
+    orientation(startCoords, endCoords) {
         const uppercaseLetters = [
             " ",
             "A",
@@ -439,75 +455,67 @@ class Gameboard {
         const rowStart = Number(matchStart[2]); // Number part (Rows)
         const rowEnd = Number(matchEnd[2]);
 
+        const columnIndexStart = uppercaseLetters.indexOf(columnStart);
+        const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
+
         if (columnStart === columnEnd) {
             return "vertical";
-
         } else if (rowStart === rowEnd) {
             return "horizontal";
-
         } else if (rowEnd > rowStart && columnIndexEnd > columnIndexStart) {
             return "diagonal";
-            
+        }
     }
 
-    alreadyPlaced(occupiedCells, shipPlacement) {
+    alreadyPlaced(startCoords, endCoords) {
+        const matchStart = startCoords.match(/^([A-Z]+)(\d+)$/);
+        const matchEnd = endCoords.match(/^([A-Z]+)(\d+)$/);
 
-    }
-    }
+        const columnStart = matchStart[1]; // Letter part (Columns)
+        const columnEnd = matchEnd[1];
+        const rowStart = Number(matchStart[2]); // Number part (Rows)
+        const rowEnd = Number(matchEnd[2]);
 
-    alreadyPlaced(startCoords, endCoords){
-            const matchStart = startCoords.match(/^([A-Z]+)(\d+)$/);
-            const matchEnd = endCoords.match(/^([A-Z]+)(\d+)$/);
+        const placement = [];
 
-            const columnStart = matchStart[1]; // Letter part (Columns)
-            const columnEnd = matchEnd[1];
-            const rowStart = Number(matchStart[2]); // Number part (Rows)
-            const rowEnd = Number(matchEnd[2]);
+        const uppercaseLetters = [
+            " ",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+        ];
 
-            const placement = [];
+        if (columnStart === columnEnd) {
+            // Find column index
+            const columnIndex = uppercaseLetters.indexOf(columnStart);
 
-            const uppercaseLetters = [
-                " ",
-                "A",
-                "B",
-                "C",
-                "D",
-                "E",
-                "F",
-                "G",
-                "H",
-                "I",
-                "J",
-            ];
-
-            if (columnStart === columnEnd) {
-                // Find column index
-                const columnIndex = uppercaseLetters.indexOf(columnStart);
-
-                // Push coordinates of gridpoint to placement array 
-                for (let i = rowStart; i <= rowEnd; i++) {
-                    placement.push(`${uppercaseLetters[columnIndex]}${i}`)
-                }
-            } else if (rowStart === rowEnd) {
-
-                // Find column indexes
-                const columnIndexStart = uppercaseLetters.indexOf(columnStart);
-                const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
-
-                // Push coordinates of gridpoint to placement array 
-                for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
-                    placement.push(`${uppercaseLetters[i]}${rowStart}`)
-                }
+            // Push coordinates of gridpoint to placement array
+            for (let i = rowStart; i <= rowEnd; i++) {
+                placement.push(`${uppercaseLetters[columnIndex]}${i}`);
             }
-             
-            //go through each gridpoint and see if one of them has is already occupied by a ship
-            let set1 = new Set(placement);
-            return this.occupiedCells.some(item => set1.has(item));
+        } else if (rowStart === rowEnd) {
+            // Find column indexes
+            const columnIndexStart = uppercaseLetters.indexOf(columnStart);
+            const columnIndexEnd = uppercaseLetters.indexOf(columnEnd);
 
+            // Push coordinates of gridpoint to placement array
+            for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
+                placement.push(`${uppercaseLetters[i]}${rowStart}`);
+            }
+        }
 
+        //go through each gridpoint and see if one of them has is already occupied by a ship
+        let set1 = new Set(this.occupiedCells);
+        return placement.some((item) => set1.has(item));
     }
 }
-
 
 const gameboard = new Gameboard();
 gameboard.placeShip();
