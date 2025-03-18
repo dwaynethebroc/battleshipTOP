@@ -474,13 +474,13 @@ class Gameboard {
                 if (ship.placement.includes(coordinates)) {
                     const hit = ship.hit(coordinates);
                     if (hit) {
-                        this.board[row][col] = "O";
+                        this.board[row][col] = "X";
                     }
                 }
             });
         } else {
             this.missedShots.push(coordinates);
-            this.board[row][col] = "X";
+            this.board[row][col] = "!";
             console.log(`missed shot, board updated`);
         }
     }
