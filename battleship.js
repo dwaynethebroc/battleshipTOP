@@ -8,6 +8,7 @@ class Ship {
         //properties
         this.damage = 0;
         this.sunk = false;
+        this.targetedSquares = [];
 
         //public properties
         this.length = length;
@@ -18,31 +19,16 @@ class Ship {
 
     hit(square) {
         const hitShip = this.placement.includes(square);
-        const alreadyHit = this.targetedSquares.includes(square);
 
-        if (alreadyHit) {
-            // this.message(
-            //     `You have already selected ${square} before, choose another tile to hit`,
-            // );
-
-            return;
-        } else if (hitShip && !alreadyHit) {
+        if (hitShip) {
             this.damage++;
             this.targetedSquares.push(square);
-
-            // this.message(
-            //     `Battleship is hit: ${this.type} \n Damage: ${this.damage} \n Squares hit: ${this.targetedSquares}`,
-            // );
-
             return true;
-        } else {
-            // this.message(`MISS: no Battleship was hit`);
-            return false;
         }
     }
 
     isSunk() {
-        if (this.targetedSquares.length === this.placement.length) {
+        if (this.targetedSquares.sort() === this.placement.sort()) {
             // this.message(this.targetedSquares);
             // this.message(this.placement);
 
@@ -63,6 +49,7 @@ class Gameboard {
         this.board = this.createBoard();
         this.ships = [];
         this.occupiedCells = [];
+        this.missedShots = [];
         this.uppercaseLetters = [
             " ",
             "A",
@@ -226,6 +213,20 @@ class Gameboard {
         });
     }
 
+    promptShip(ship) {
+        console.log(
+            `Enter coordinates for \nship type: ${ship.type.toUpperCase()}, length: ${ship.length}\n(Provide ${ship.length} grid coordinates in the format {startingCoordinate}-{endCoordinate}, such as: A2-A5)\n`,
+        );
+
+        let shipPlacement = prompt("Enter your coordinate: ")
+            .trim()
+            .toUpperCase();
+
+        console.log(`\n Your answer is: "${shipPlacement}" \n`);
+
+        return shipPlacement;
+    }
+
     changeBoard(startCoords, endCoords, board, ship) {
         const matchStart = startCoords.match(/^([A-Z]+)(\d+)$/);
         const matchEnd = endCoords.match(/^([A-Z]+)(\d+)$/);
@@ -327,20 +328,6 @@ class Gameboard {
         } else {
             return false;
         }
-    }
-
-    promptShip(ship) {
-        console.log(
-            `Enter coordinates for \nship type: ${ship.type.toUpperCase()}, length: ${ship.length}\n(Provide ${ship.length} grid coordinates in the format {startingCoordinate}-{endCoordinate}, such as: A2-A5)\n`,
-        );
-
-        let shipPlacement = prompt("Enter your coordinate: ")
-            .trim()
-            .toUpperCase();
-
-        console.log(`\n Your answer is: "${shipPlacement}" \n`);
-
-        return shipPlacement;
     }
 
     errorMessage(
@@ -461,6 +448,55 @@ class Gameboard {
         //go through each gridpoint and see if one of them has is already occupied by a ship
         let set1 = new Set(this.occupiedCells);
         return placement.some((item) => set1.has(item));
+    }
+
+    promptAttack() {
+        const guess = prompt("Enter the coordinate you want to attack: ")
+            .trim()
+            .toUpperCase();
+
+        console.log(`\n Your answer is: "${guess}" \n`);
+
+        return guess;
+    }
+
+    receiveAttack() {
+        const coordinates = promptAttack();
+        const matchStart = coordinates.match(/^([A-Z]+)(\d+)$/);
+
+        const col = this.uppercaseLetters.findIndex(matchStart[1]); // Letter part (Columns)
+        const row = Number(matchStart[2]); // Number part (Rows)
+
+        const hitFlag = this.occupiedCells.includes(coordinates);
+
+        if (hitFlag) {
+            this.ships.forEach((ship) => {
+                if (ship.placement.includes(coordinates)) {
+                    const hit = ship.hit(coordinates);
+                    if (hit) {
+                        this.board[row][col] = "O";
+                    }
+                }
+            });
+        } else {
+            this.missedShots.push(coordinates);
+            this.board[row][col] = "X";
+            console.log(`missed shot, board updated`);
+        }
+    }
+
+    allSunk() {
+        let allSunk = [];
+
+        this.ships.forEach((ship) => {
+            allSunk.push(ship.sunk);
+        });
+
+        if (allSunk.includes(false)) {
+            console.log("All ships not sunk yet");
+        } else {
+            console.log("All ships have been sunk");
+        }
     }
 }
 

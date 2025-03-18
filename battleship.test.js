@@ -1,4 +1,7 @@
 import { Ship, Gameboard } from "./battleship.js";
+import promptSync from "prompt-sync";
+
+jest.mock("prompt-sync", () => jest.fn());
 
 test("Ship exists", () => {
     const testDestroyer = new Ship(
@@ -30,7 +33,7 @@ test("Ship exists", () => {
     expect(testDestroyer.sunk).toBe(true);
 });
 
-    //   Gameboard instantiation
+//   Gameboard instantiation
 
 test("Gameboard exists", () => {
     const testBoard = new Gameboard();
@@ -50,19 +53,19 @@ test("Gameboard exists", () => {
     ]);
 });
 
-    //   Board generation logic
+//   Board generation logic
 
 test("Gameboard is the correct length", () => {
-    const testBoard = new Gameboard();
+    const testGameBoard = new Gameboard();
 
-    expect(testBoard.board.length).toBe(11);
-    expect(testBoard.board[0].length).toBe(11);
+    expect(testGameBoard.board.length).toBe(11);
+    expect(testGameBoard.board[0].length).toBe(11);
 });
 
 test("has correct column headers", () => {
-    const testBoard = new Gameboard();
+    const testGameBoard = new Gameboard();
 
-    expect(testBoard.board[0]).toStrictEqual([
+    expect(testGameBoard.board[0]).toStrictEqual([
         "  ",
         "A",
         "B",
@@ -79,35 +82,37 @@ test("has correct column headers", () => {
 
 //   Ship placement validation
 
-describe('Gameboard - placeShip', () => {
+describe("Gameboard - placeShip", () => {
     const testGameBoard = new Gameboard();
-    
+
     beforeEach(() => {
-        jest.spyOn(testGameBoard, 'promptShip') // Mocks function
-            .mockImplementationOnce(() => "A9-A10"); //ship 1 placement
-            .mockImplementationOnce(() => "H10-J10"); //ship 2 placement
-            .mockImplementationOnce(() => "H1-J1"); //etc
-            .mockImplementationOnce(() => "A1-A4");
-            .mockImplementationOnce(() => "C6-G6");
+        jest.spyOn(testGameBoard, "promptShip")
+            .mockImplementationOnce(() => "A9-A10") // Ship 1
+            .mockImplementationOnce(() => "H10-J10") // Ship 2
+            .mockImplementationOnce(() => "H1-J1") // Ship 3
+            .mockImplementationOnce(() => "A1-A4") // Ship 4
+            .mockImplementationOnce(() => "C6-G6"); // Ship 5
     });
 
     afterEach(() => {
         jest.restoreAllMocks(); //reset mocks after each test
-    })
+    });
 
     //   A ship should be placed only within valid board coordinates.
-    test('Ship is placed in valid board coordinates', () => {
+    //   The board should correctly update when a ship is placed.
+    test("Ship is placed in valid board coordinates", () => {
+        const mockPrompt = require("prompt-sync")();
         testGameboard.placeShip(); //starts mock response
 
         //Patrol ship
         expect(testGameBoard.board[10][1]).toBe("P");
         expect(testGameBoard.board[11][1]).toBe("P");
-        
+
         //Submarine ship
         expect(testGameBoard.board[10][8]).toBe("S");
         expect(testGameBoard.board[10][9]).toBe("S");
         expect(testGameBoard.board[10][10]).toBe("S");
-        
+
         //Destroyer ship
         expect(testGameBoard.board[1][8]).toBe("D");
         expect(testGameBoard.board[1][9]).toBe("D");
@@ -125,63 +130,54 @@ describe('Gameboard - placeShip', () => {
         expect(testGameBoard.board[5][6]).toBe("C");
         expect(testGameBoard.board[6][6]).toBe("C");
         expect(testGameBoard.board[7][6]).toBe("C");
-
     });
 
     //     The length of the ship must match the expected ship type.
-    test('Ship is placed in valid board coordinates', () => {
+
+    test("Ships have the correct length", () => {
         testGameboard.placeShip(); //starts mock response
 
         //Patrol ship
-        expect(testGameboard.ships[0].length).toBe(2)
-        
-        //Submarine ship
-        expect(testGameboard.ships[1].length).toBe(3)
-        
-        //Destroyer ship
-        expect(testGameboard.ships[2].length).toBe(3)
+        expect(testGameboard.ships[0].length).toBe(2);
 
+        //Submarine ship
+        expect(testGameboard.ships[1].length).toBe(3);
+
+        //Destroyer ship
+        expect(testGameboard.ships[2].length).toBe(3);
 
         //Battleship ship
-        expect(testGameboard.ships[3].length).toBe(4)
-
-
-        //Carrier ship
-        expect(testGameboard.ships[4].length).toBe(5)
-    });
-
-
-    //     Ships should not overlap.
-    test('Ship is placed in valid board coordinates', () => {
-        testGameboard.placeShip(); //starts mock response
-
-        //Patrol ship
-        expect(testGameboard.ships[0].length).toBe(2)
-        
-        //Submarine ship
-        expect(testGameboard.ships[1].length).toBe(3)
-        
-        //Destroyer ship
-        expect(testGameboard.ships[2].length).toBe(3)
-
-
-        //Battleship ship
-        expect(testGameboard.ships[3].length).toBe(4)
-
+        expect(testGameboard.ships[3].length).toBe(4);
 
         //Carrier ship
-        expect(testGameboard.ships[4].length).toBe(5)
+        expect(testGameboard.ships[4].length).toBe(5);
     });
+
     //     Ships should be placed either horizontally or vertically but never diagonally.
-    //     The board should correctly update when a ship is placed.
+    test("Ship is placed correctly horizontal or vertical", () => {
+        testGameboard.placeShip(); //starts mock response
 
+        //Patrol ship
+        expect(testGameboard.ships[0].orientation).toBe("vertical");
+
+        //Submarine ship
+        expect(testGameboard.ships[1].orientation).toBe("horizontal");
+
+        //Destroyer ship
+        expect(testGameboard.ships[2].orientation).toBe("horizontal");
+
+        //Battleship ship
+        expect(testGameboard.ships[3].orientation).toBe("vertical");
+
+        //Carrier ship
+        expect(testGameboard.ships[4].orientation).toBe("horizontal");
+    });
 });
 
-    //   Collision detection
-    //   Out-of-bounds detection
-    //   Coordinate parsing and validation
-    //   Error handling scenarios
+//   Out-of-bounds detection
 
+//   Coordinate parsing and validation
+//   Error handling scenarios
 
 //     const shipObjects = [
 //         Ship {
