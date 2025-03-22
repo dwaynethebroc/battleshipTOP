@@ -1,30 +1,18 @@
 import { Ship, Gameboard } from "./battleship.js";
 import promptSync from "prompt-sync";
 
-jest.mock(
-    "prompt-sync",
-    () => () =>
-        jest
-            .fn()
-            .mockReturnValueOnce("A9-A10") // Patrol (length 2)
-            .mockReturnValueOnce("B3-B5") // Submarine (length 3)
-            .mockReturnValueOnce("C7-E7") // Destroyer (length 3)
-            .mockReturnValueOnce("D10-G10") // Battleship (length 4)
-            .mockReturnValueOnce("H4-H8"), // Carrier (length 5) // Default mock response
-);
-
+// 1. Define mock outside jest.mock
 let mockPrompt;
 
-beforeAll(() => {
-    mockPrompt = jest.fn();
-    jest.mock("prompt-sync", () => () => mockPrompt);
-});
+// 2. Mock prompt-sync AFTER mockPrompt is defined
+jest.mock("prompt-sync", () => () => mockPrompt);
 
 test("Ship exists", () => {
     const testDestroyer = new Ship(
         5,
         ["A2", "A3", "A4", "A5", "A6"],
         "destroyer",
+        "horizontal",
     );
 
     expect(testDestroyer).toEqual({
@@ -34,6 +22,7 @@ test("Ship exists", () => {
         sunk: false,
         targetedSquares: [],
         type: "destroyer",
+        orientation: "horizontal",
     });
     expect(testDestroyer.length).toBe(5);
     expect(testDestroyer.placement).toEqual(["A2", "A3", "A4", "A5", "A6"]);
@@ -100,17 +89,28 @@ test("has correct column headers", () => {
 //   Ship placement validation
 
 describe("Gameboard - placeShip", () => {
-    // Define mock responses in the order ships are placed
-    mockPrompt;
+    let testGameBoard;
 
-    const testGameBoard = new Gameboard();
+    beforeEach(() => {
+        // 3. Initialize mock with implementation
+        mockPrompt = jest
+            .fn()
+            .mockReturnValueOnce("A9-A10")
+            .mockReturnValueOnce("B3-B5")
+            .mockReturnValueOnce("C7-E7")
+            .mockReturnValueOnce("D10-G10")
+            .mockReturnValueOnce("H4-H8");
+
+        testGameBoard = new Gameboard();
+        testGameBoard.placeShip();
+    });
 
     test("Ship exists", () => {
         // Verify ship placements
-        expect(gameboard.ships).toHaveLength(5);
-        expect(gameboard.occupiedCells).toEqual([
-            "A1",
-            "A2", // Patrol
+        expect(testGameBoard.ships).toHaveLength(5);
+        expect(testGameBoard.occupiedCells).toEqual([
+            "A9",
+            "A10", // Patrol
             "B3",
             "B4",
             "B5", // Submarine
@@ -132,69 +132,69 @@ describe("Gameboard - placeShip", () => {
     //   A ship should be placed only within valid board coordinates.
     //   The board should correctly update when a ship is placed.
     test("Ship is placed in valid board coordinates", () => {
-        //Patrol ship
-        expect(testGameBoard.board[10][1]).toBe("P");
-        expect(testGameBoard.board[11][1]).toBe("P");
+        // Patrol (A9-A10) - vertical
+        expect(testGameBoard.board[9][1]).toBe("P"); // A9 (row 10)
+        expect(testGameBoard.board[10][1]).toBe("P"); // A10 (row 11)
 
-        //Submarine ship
-        expect(testGameBoard.board[10][8]).toBe("S");
-        expect(testGameBoard.board[10][9]).toBe("S");
-        expect(testGameBoard.board[10][10]).toBe("S");
+        // Submarine (B3-B5) - vertical
+        expect(testGameBoard.board[3][2]).toBe("S"); // B3 (row 4)
+        expect(testGameBoard.board[4][2]).toBe("S"); // B4 (row 5)
+        expect(testGameBoard.board[5][2]).toBe("S"); // B5 (row 6)
 
-        //Destroyer ship
-        expect(testGameBoard.board[1][8]).toBe("D");
-        expect(testGameBoard.board[1][9]).toBe("D");
-        expect(testGameBoard.board[1][10]).toBe("D");
+        // Destroyer (C7-E7) - horizontal
+        expect(testGameBoard.board[7][3]).toBe("D"); // C7 (column 3)
+        expect(testGameBoard.board[7][4]).toBe("D"); // D7 (column 4)
+        expect(testGameBoard.board[7][5]).toBe("D"); // E7 (column 5)
 
-        //Battleship ship
-        expect(testGameBoard.board[1][1]).toBe("B");
-        expect(testGameBoard.board[1][2]).toBe("B");
-        expect(testGameBoard.board[1][3]).toBe("B");
-        expect(testGameBoard.board[1][4]).toBe("B");
+        // Battleship (D10-G10) - horizontal
+        expect(testGameBoard.board[10][4]).toBe("B"); // D10 (column 4)
+        expect(testGameBoard.board[10][5]).toBe("B"); // E10 (column 5)
+        expect(testGameBoard.board[10][6]).toBe("B"); // F10 (column 6)
+        expect(testGameBoard.board[10][7]).toBe("B"); // G10 (column 7)
 
-        //Carrier ship
-        expect(testGameBoard.board[3][6]).toBe("C");
-        expect(testGameBoard.board[4][6]).toBe("C");
-        expect(testGameBoard.board[5][6]).toBe("C");
-        expect(testGameBoard.board[6][6]).toBe("C");
-        expect(testGameBoard.board[7][6]).toBe("C");
+        // Carrier (H4-H8) - vertical
+        expect(testGameBoard.board[4][8]).toBe("C"); // H4 (row 5)
+        expect(testGameBoard.board[5][8]).toBe("C"); // H5 (row 6)
+        expect(testGameBoard.board[6][8]).toBe("C"); // H6 (row 7)
+        expect(testGameBoard.board[7][8]).toBe("C"); // H7 (row 8)
+        expect(testGameBoard.board[8][8]).toBe("C"); // H8 (row 9)
     });
 
     //     The length of the ship must match the expected ship type.
 
     test("Ships have the correct length", () => {
         //Patrol ship
-        expect(testGameboard.ships[0].length).toBe(2);
+        expect(testGameBoard.ships[0].length).toBe(2);
 
         //Submarine ship
-        expect(testGameboard.ships[1].length).toBe(3);
+        expect(testGameBoard.ships[1].length).toBe(3);
 
         //Destroyer ship
-        expect(testGameboard.ships[2].length).toBe(3);
+        expect(testGameBoard.ships[2].length).toBe(3);
 
         //Battleship ship
-        expect(testGameboard.ships[3].length).toBe(4);
+        expect(testGameBoard.ships[3].length).toBe(4);
 
         //Carrier ship
-        expect(testGameboard.ships[4].length).toBe(5);
+        expect(testGameBoard.ships[4].length).toBe(5);
     });
 
     //     Ships should be placed either horizontally or vertically but never diagonally.
     test("Ship is placed correctly horizontal or vertical", () => {
         //Patrol ship
-        expect(testGameboard.ships[0].orientation).toBe("vertical");
+        expect(testGameBoard.ships[0].orientation).toBe("vertical");
 
         //Submarine ship
-        expect(testGameboard.ships[1].orientation).toBe("horizontal");
+        expect(testGameBoard.ships[1].orientation).toBe("vertical");
 
         //Destroyer ship
-        expect(testGameboard.ships[2].orientation).toBe("horizontal");
+        expect(testGameBoard.ships[2].orientation).toBe("horizontal");
 
         //Battleship ship
-        expect(testGameboard.ships[3].orientation).toBe("vertical");
+        expect(testGameBoard.ships[3].orientation).toBe("horizontal");
 
         //Carrier ship
-        expect(testGameboard.ships[4].orientation).toBe("horizontal");
+        expect(testGameBoard.ships[4].orientation).toBe("vertical");
     });
 });
 
@@ -246,9 +246,21 @@ describe("Gameboard - placeShip", () => {
 //         }
 //       ]
 // const occupiedCells =   [
-//     'A9',  'A10', 'H10', 'I10',
-//     'J10', 'H1',  'I1',  'J1',
-//     'A1',  'A2',  'A3',  'A4',
-//     'C6',  'D6',  'E6',  'F6',
-//     'G6'
+// "A9",
+// "A10", // Patrol
+// "B3",
+// "B4",
+// "B5", // Submarine
+// "C7",
+// "D7",
+// "E7", // Destroyer
+// "D10",
+// "E10",
+// "F10",
+// "G10", // Battleship
+// "H4",
+// "H5",
+// "H6",
+// "H7",
+// "H8", // Carrier
 //   ]

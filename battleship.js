@@ -24,14 +24,16 @@ class Ship {
             this.damage++;
             this.targetedSquares.push(square);
             return true;
+        } else {
+            return false;
         }
     }
 
     isSunk() {
-        if (this.targetedSquares.sort() === this.placement.sort()) {
-            // this.message(this.targetedSquares);
-            // this.message(this.placement);
+        const sortedTarget = [...this.targetedSquares].sort();
+        const sortedPlacement = [...this.placement].sort();
 
+        if (JSON.stringify(sortedTarget) === JSON.stringify(sortedPlacement)) {
             this.sunk = true;
             return true;
         } else {
@@ -218,13 +220,14 @@ class Gameboard {
             `Enter coordinates for \nship type: ${ship.type.toUpperCase()}, length: ${ship.length}\n(Provide ${ship.length} grid coordinates in the format {startingCoordinate}-{endCoordinate}, such as: A2-A5)\n`,
         );
 
-        let shipPlacement = prompt("Enter your coordinate: ")
-            .trim()
-            .toUpperCase();
+        const response = prompt("Enter your coordinate: ");
 
-        console.log(`\n Your answer is: "${shipPlacement}" \n`);
+        // Add validation for empty responses
+        if (!response) {
+            throw new Error("No input provided for ship placement");
+        }
 
-        return shipPlacement;
+        return response.trim().toUpperCase();
     }
 
     changeBoard(startCoords, endCoords, board, ship) {
