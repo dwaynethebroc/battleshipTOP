@@ -1,7 +1,24 @@
 import { Ship, Gameboard } from "./battleship.js";
 import promptSync from "prompt-sync";
 
-jest.mock("prompt-sync", () => jest.fn());
+jest.mock(
+    "prompt-sync",
+    () => () =>
+        jest
+            .fn()
+            .mockReturnValueOnce("A9-A10") // Patrol (length 2)
+            .mockReturnValueOnce("B3-B5") // Submarine (length 3)
+            .mockReturnValueOnce("C7-E7") // Destroyer (length 3)
+            .mockReturnValueOnce("D10-G10") // Battleship (length 4)
+            .mockReturnValueOnce("H4-H8"), // Carrier (length 5) // Default mock response
+);
+
+let mockPrompt;
+
+beforeAll(() => {
+    mockPrompt = jest.fn();
+    jest.mock("prompt-sync", () => () => mockPrompt);
+});
 
 test("Ship exists", () => {
     const testDestroyer = new Ship(
@@ -83,27 +100,38 @@ test("has correct column headers", () => {
 //   Ship placement validation
 
 describe("Gameboard - placeShip", () => {
+    // Define mock responses in the order ships are placed
+    mockPrompt;
+
     const testGameBoard = new Gameboard();
 
-    beforeEach(() => {
-        jest.spyOn(testGameBoard, "promptShip")
-            .mockImplementationOnce(() => "A9-A10") // Ship 1
-            .mockImplementationOnce(() => "H10-J10") // Ship 2
-            .mockImplementationOnce(() => "H1-J1") // Ship 3
-            .mockImplementationOnce(() => "A1-A4") // Ship 4
-            .mockImplementationOnce(() => "C6-G6"); // Ship 5
-    });
-
-    afterEach(() => {
-        jest.restoreAllMocks(); //reset mocks after each test
+    test("Ship exists", () => {
+        // Verify ship placements
+        expect(gameboard.ships).toHaveLength(5);
+        expect(gameboard.occupiedCells).toEqual([
+            "A1",
+            "A2", // Patrol
+            "B3",
+            "B4",
+            "B5", // Submarine
+            "C7",
+            "D7",
+            "E7", // Destroyer
+            "D10",
+            "E10",
+            "F10",
+            "G10", // Battleship
+            "H4",
+            "H5",
+            "H6",
+            "H7",
+            "H8", // Carrier
+        ]);
     });
 
     //   A ship should be placed only within valid board coordinates.
     //   The board should correctly update when a ship is placed.
     test("Ship is placed in valid board coordinates", () => {
-        const mockPrompt = require("prompt-sync")();
-        testGameboard.placeShip(); //starts mock response
-
         //Patrol ship
         expect(testGameBoard.board[10][1]).toBe("P");
         expect(testGameBoard.board[11][1]).toBe("P");
@@ -135,8 +163,6 @@ describe("Gameboard - placeShip", () => {
     //     The length of the ship must match the expected ship type.
 
     test("Ships have the correct length", () => {
-        testGameboard.placeShip(); //starts mock response
-
         //Patrol ship
         expect(testGameboard.ships[0].length).toBe(2);
 
@@ -155,8 +181,6 @@ describe("Gameboard - placeShip", () => {
 
     //     Ships should be placed either horizontally or vertically but never diagonally.
     test("Ship is placed correctly horizontal or vertical", () => {
-        testGameboard.placeShip(); //starts mock response
-
         //Patrol ship
         expect(testGameboard.ships[0].orientation).toBe("vertical");
 
