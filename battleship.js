@@ -18,6 +18,13 @@ class Ship {
     }
 
     hit(square) {
+        if (this.targetedSquares.includes(square)) {
+            console.log(
+                "square has already been targeted, choose another square",
+            );
+            return square;
+        }
+
         const hitShip = this.placement.includes(square);
 
         if (hitShip) {
@@ -51,7 +58,7 @@ class Gameboard {
         this.board = this.createBoard();
         this.ships = [];
         this.occupiedCells = [];
-        this.missedShots = [];
+        this.guesses = [];
         this.uppercaseLetters = [
             " ",
             "A",
@@ -471,18 +478,25 @@ class Gameboard {
         const row = Number(matchStart[2]); // Number part (Rows)
 
         const hitFlag = this.occupiedCells.includes(coordinates);
+        const alreadyGuessed = this.guesses.includes(coordinates);
 
-        if (hitFlag) {
+        if (hitFlag && !alreadyGuessed) {
             this.ships.forEach((ship) => {
                 if (ship.placement.includes(coordinates)) {
+                    this.guesses.push(coordinates);
                     const hit = ship.hit(coordinates);
                     if (hit) {
                         this.board[row][col] = "X";
                     }
                 }
             });
+        } else if (!alreadyGuessed) {
+            console.log(
+                "this coordinate has already been guessed please pick another option",
+            );
+            this.receiveAttack();
         } else {
-            this.missedShots.push(coordinates);
+            this.guesses.push(coordinates);
             this.board[row][col] = "!";
             console.log(`missed shot, board updated`);
         }

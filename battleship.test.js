@@ -1,11 +1,24 @@
 import { Ship, Gameboard } from "./battleship.js";
 import promptSync from "prompt-sync";
 
-// 1. Define mock outside jest.mock
+jest.mock(
+    "prompt-sync",
+    () => () =>
+        jest
+            .fn()
+            .mockReturnValueOnce("A9-A10") // Patrol (length 2)
+            .mockReturnValueOnce("B3-B5") // Submarine (length 3)
+            .mockReturnValueOnce("C7-E7") // Destroyer (length 3)
+            .mockReturnValueOnce("D10-G10") // Battleship (length 4)
+            .mockReturnValueOnce("H4-H8"), // Carrier (length 5) // Default mock response
+);
+
 let mockPrompt;
 
-// 2. Mock prompt-sync AFTER mockPrompt is defined
-jest.mock("prompt-sync", () => () => mockPrompt);
+beforeAll(() => {
+    mockPrompt = jest.fn();
+    jest.mock("prompt-sync", () => () => mockPrompt);
+});
 
 test("Ship exists", () => {
     const testDestroyer = new Ship(
@@ -93,6 +106,7 @@ describe("Gameboard - placeShip", () => {
 
     beforeEach(() => {
         // 3. Initialize mock with implementation
+        mockPrompt.mockReset();
         mockPrompt = jest
             .fn()
             .mockReturnValueOnce("A9-A10")
@@ -100,7 +114,6 @@ describe("Gameboard - placeShip", () => {
             .mockReturnValueOnce("C7-E7")
             .mockReturnValueOnce("D10-G10")
             .mockReturnValueOnce("H4-H8");
-
         testGameBoard = new Gameboard();
         testGameBoard.placeShip();
     });
