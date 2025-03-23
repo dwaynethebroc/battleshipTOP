@@ -552,13 +552,19 @@ class Gameboard {
 
                 if (orientationOfShip === "horizontal") {
                     endRow = startRow; //Numbers
+
                     const endIndex = this.uppercaseLetters.indexOf(startCol);
                     const endAdjust = endIndex + ship.length - 1;
                     console.log(endAdjust);
-                    endCol = this.uppercaseLetters[endAdjust]; //Letters
-                } else if (orientationOfShip === "vertical") {
+                    if (endAdjust < this.uppercaseLetters.length) {
+                        endCol = this.uppercaseLetters[endAdjust]; //Letters
+                    } else {
+                        continue;
+                    }
+                } else {
                     endRow = startRow + ship.length - 1; //Numbers
                     endCol = startCol; //Letters
+                    if (endRow > 10) continue;
                 }
 
                 startCoords = `${startCol}${startRow.toString()}`;
