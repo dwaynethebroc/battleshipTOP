@@ -587,10 +587,6 @@ class Gameboard {
                 ship,
             );
 
-            placement.forEach((square) => {
-                this.occupiedCells.push(square);
-            });
-
             this.ships.push(
                 new Ship(ship.length, placement, ship.type, orientationOfShip),
             );
