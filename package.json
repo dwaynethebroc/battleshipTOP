@@ -9,5 +9,9 @@
   },
   "scripts": {
     "test": "jest"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.4.0",
+    "inquirer": "^12.5.0"
   }
 }

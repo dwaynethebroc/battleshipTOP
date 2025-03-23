@@ -1,7 +1,7 @@
-export { Ship, Gameboard };
-import promptSync from "prompt-sync";
+// export { Ship, Gameboard };
+// import promptSync from "prompt-sync";
 
-const prompt = promptSync();
+// const prompt = promptSync();
 
 class Ship {
     constructor(length, placement, type, orientation) {
@@ -59,6 +59,7 @@ class Gameboard {
         this.ships = [];
         this.occupiedCells = [];
         this.guesses = [];
+        this.missedAttacks = [];
         this.uppercaseLetters = [
             " ",
             "A",
@@ -108,6 +109,7 @@ class Gameboard {
     }
 
     printBoard(board) {
+        console.log(`\n       YOUR BOARD \n`);
         board.forEach((row) => console.log(row.join(" ")));
     }
 
@@ -228,11 +230,6 @@ class Gameboard {
         );
 
         const response = prompt("Enter your coordinate: ");
-
-        // Add validation for empty responses
-        if (!response) {
-            throw new Error("No input provided for ship placement");
-        }
 
         return response.trim().toUpperCase();
     }
@@ -384,7 +381,6 @@ class Gameboard {
 
         // Find column indexes
         const columnIndexStart = this.uppercaseLetters.indexOf(columnStart);
-        const columnIndexEnd = this.uppercaseLetters.indexOf(columnEnd);
 
         if (columnStart === columnEnd) {
             if (rowStart + boatLength <= 11 && rowStart > 0) {
@@ -474,13 +470,18 @@ class Gameboard {
         const coordinates = promptAttack();
         const matchStart = coordinates.match(/^([A-Z]+)(\d+)$/);
 
-        const col = this.uppercaseLetters.findIndex(matchStart[1]); // Letter part (Columns)
+        const col = this.uppercaseLetters.indexOf(matchStart[1]); // Letter part (Columns)
         const row = Number(matchStart[2]); // Number part (Rows)
 
         const hitFlag = this.occupiedCells.includes(coordinates);
         const alreadyGuessed = this.guesses.includes(coordinates);
 
-        if (hitFlag && !alreadyGuessed) {
+        if (alreadyGuessed) {
+            console.log(
+                "this coordinate has already been guessed please pick another option",
+            );
+            this.receiveAttack();
+        } else if (hitFlag && !alreadyGuessed) {
             this.ships.forEach((ship) => {
                 if (ship.placement.includes(coordinates)) {
                     this.guesses.push(coordinates);
@@ -490,13 +491,9 @@ class Gameboard {
                     }
                 }
             });
-        } else if (!alreadyGuessed) {
-            console.log(
-                "this coordinate has already been guessed please pick another option",
-            );
-            this.receiveAttack();
         } else {
             this.guesses.push(coordinates);
+            this.missedAttacks.push(coordinates);
             this.board[row][col] = "!";
             console.log(`missed shot, board updated`);
         }
@@ -515,9 +512,114 @@ class Gameboard {
             console.log("All ships have been sunk");
         }
     }
+
+    boardSetupHuman() {
+        //Setup the board
+        this.placeShip();
+
+        //Move to game mode
+        this.gameTurn();
+    }
+
+    boardSetupComputer() {
+        const shipTypes = [
+            { length: 2, type: "patrol" },
+            { length: 3, type: "submarine" },
+            { length: 3, type: "destroyer" },
+            { length: 4, type: "battleship" },
+            { length: 5, type: "carrier" },
+        ];
+
+        shipTypes.forEach((ship) => {
+            let outOfBounds = true;
+            let alreadyPlaced = true;
+            let orientationOfShip = "";
+            let startCoords = "";
+            let endCoords = "";
+
+            while (outOfBounds || alreadyPlaced) {
+                const startRow = Math.floor(Math.random() * 10) + 1; //Numbers
+                const startCol =
+                    this.uppercaseLetters[Math.floor(Math.random() * 10) + 1]; //Letters
+
+                console.log(startRow);
+                console.log(startCol);
+
+                orientationOfShip = this.verticalOrHorizontal();
+
+                let endRow = 0;
+                let endCol = "";
+
+                if (orientationOfShip === "horizontal") {
+                    endRow = startRow; //Numbers
+                    const endIndex = this.uppercaseLetters.indexOf(startCol);
+                    const endAdjust = endIndex + ship.length - 1;
+                    console.log(endAdjust);
+                    endCol = this.uppercaseLetters[endAdjust]; //Letters
+                } else if (orientationOfShip === "vertical") {
+                    endRow = startRow + ship.length - 1; //Numbers
+                    endCol = startCol; //Letters
+                }
+
+                startCoords = `${startCol}${startRow.toString()}`;
+                endCoords = `${endCol}${endRow.toString()}`;
+
+                outOfBounds = this.outOfBounds(
+                    ship.length,
+                    startCoords,
+                    endCoords,
+                );
+
+                alreadyPlaced = this.alreadyPlaced(startCoords, endCoords);
+                console.log(startCoords + "-" + endCoords);
+            }
+
+            const placement = this.changeBoard(
+                startCoords,
+                endCoords,
+                this.board,
+                ship,
+            );
+
+            placement.forEach((square) => {
+                this.occupiedCells.push(square);
+            });
+
+            this.ships.push(
+                new Ship(ship.length, placement, ship.type, orientationOfShip),
+            );
+            this.printBoard(this.board);
+        });
+    }
+
+    verticalOrHorizontal() {
+        const vertHorizontal = ["vertical", "horizontal"];
+
+        const verticalOrHorizontal = vertHorizontal[Math.round(Math.random())];
+
+        console.log(verticalOrHorizontal);
+        return verticalOrHorizontal;
+    }
 }
 
-const gameboard = new Gameboard();
-gameboard.placeShip();
-console.log(gameboard.ships);
-console.log(gameboard.occupiedCells);
+class Player {
+    constructor(playerType) {
+        this.playerBoard = new Gameboard();
+
+        this.playerType = playerType;
+    }
+
+    gameSetup() {
+        if (this.playerType === "human") {
+            this.playerBoard.boardSetupHuman();
+        } else if (this.playerType === "computer") {
+            this.playerBoard.boardSetupComputer();
+        } else {
+            throw new Error("player type needs to be 'computer' or 'human'");
+        }
+    }
+}
+const computer = new Player("computer");
+computer.gameSetup();
+console.log(computer.playerBoard.ships);
+console.log(computer.playerBoard.occupiedCells);

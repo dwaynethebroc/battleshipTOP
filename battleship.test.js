@@ -1,5 +1,5 @@
-import { Ship, Gameboard } from "./battleship.js";
-import promptSync from "prompt-sync";
+// import { Ship, Gameboard } from "./battleship.js";
+// import promptSync from "prompt-sync";
 
 jest.mock(
     "prompt-sync",
@@ -110,35 +110,35 @@ describe("Gameboard - placeShip", () => {
         mockPrompt = jest
             .fn()
             .mockReturnValueOnce("A9-A10")
-            .mockReturnValueOnce("B3-B5")
-            .mockReturnValueOnce("C7-E7")
-            .mockReturnValueOnce("D10-G10")
-            .mockReturnValueOnce("H4-H8");
+            .mockReturnValueOnce("H10-J10")
+            .mockReturnValueOnce("A1-A3")
+            .mockReturnValueOnce("G1-J1")
+            .mockReturnValueOnce("E4-E8");
         testGameBoard = new Gameboard();
         testGameBoard.placeShip();
     });
 
     test("Ship exists", () => {
-        // Verify ship placements
+        // Verify ship placement
         expect(testGameBoard.ships).toHaveLength(5);
         expect(testGameBoard.occupiedCells).toEqual([
             "A9",
-            "A10", // Patrol
-            "B3",
-            "B4",
-            "B5", // Submarine
-            "C7",
-            "D7",
-            "E7", // Destroyer
-            "D10",
-            "E10",
-            "F10",
-            "G10", // Battleship
-            "H4",
-            "H5",
-            "H6",
-            "H7",
-            "H8", // Carrier
+            "A10",
+            "H10",
+            "I10",
+            "J10",
+            "A1",
+            "A2",
+            "A3",
+            "G1",
+            "H1",
+            "I1",
+            "J1",
+            "E4",
+            "E5",
+            "E6",
+            "E7",
+            "E8",
         ]);
     });
 
@@ -198,10 +198,10 @@ describe("Gameboard - placeShip", () => {
         expect(testGameBoard.ships[0].orientation).toBe("vertical");
 
         //Submarine ship
-        expect(testGameBoard.ships[1].orientation).toBe("vertical");
+        expect(testGameBoard.ships[1].orientation).toBe("horizontal");
 
         //Destroyer ship
-        expect(testGameBoard.ships[2].orientation).toBe("horizontal");
+        expect(testGameBoard.ships[2].orientation).toBe("vertical");
 
         //Battleship ship
         expect(testGameBoard.ships[3].orientation).toBe("horizontal");
@@ -216,64 +216,57 @@ describe("Gameboard - placeShip", () => {
 //   Coordinate parsing and validation
 //   Error handling scenarios
 
-//     const shipObjects = [
-//         Ship {
-//           damage: 0,
-//           sunk: false,
-//           length: 2,
-//           placement: [ 'A9', 'A10' ],
-//           type: 'patrol',
-//           orientation: 'vertical'
-//         },
-//         Ship {
-//           damage: 0,
-//           sunk: false,
-//           length: 3,
-//           placement: [ 'H10', 'I10', 'J10' ],
-//           type: 'submarine',
-//           orientation: 'horizontal'
-//         },
-//         Ship {
-//           damage: 0,
-//           sunk: false,
-//           length: 3,
-//           placement: [ 'H1', 'I1', 'J1' ],
-//           type: 'destroyer',
-//           orientation: 'horizontal'
-//         },
-//         Ship {
-//           damage: 0,
-//           sunk: false,
-//           length: 4,
-//           placement: [ 'A1', 'A2', 'A3', 'A4' ],
-//           type: 'battleship',
-//           orientation: 'vertical'
-//         },
-//         Ship {
-//           damage: 0,
-//           sunk: false,
-//           length: 5,
-//           placement: [ 'C6', 'D6', 'E6', 'F6', 'G6' ],
-//           type: 'carrier',
-//           orientation: 'horizontal'
-//         }
-//       ]
-// const occupiedCells =   [
-// "A9",
-// "A10", // Patrol
-// "B3",
-// "B4",
-// "B5", // Submarine
-// "C7",
-// "D7",
-// "E7", // Destroyer
-// "D10",
-// "E10",
-// "F10",
-// "G10", // Battleship
-// "H4",
-// "H5",
-// "H6",
-// "H7",
-// "H8", // Carrier
+// [
+//     Ship {
+//       damage: 0,
+//       sunk: false,
+//       targetedSquares: [],
+//       length: 2,
+//       placement: [ 'A9', 'A10' ],
+//       type: 'patrol',
+//       orientation: 'vertical'
+//     },
+//     Ship {
+//       damage: 0,
+//       sunk: false,
+//       targetedSquares: [],
+//       length: 3,
+//       placement: [ 'H10', 'I10', 'J10' ],
+//       type: 'submarine',
+//       orientation: 'horizontal'
+//     },
+//     Ship {
+//       damage: 0,
+//       sunk: false,
+//       targetedSquares: [],
+//       length: 3,
+//       placement: [ 'A1', 'A2', 'A3' ],
+//       type: 'destroyer',
+//       orientation: 'vertical'
+//     },
+//     Ship {
+//       damage: 0,
+//       sunk: false,
+//       targetedSquares: [],
+//       length: 4,
+//       placement: [ 'G1', 'H1', 'I1', 'J1' ],
+//       type: 'battleship',
+//       orientation: 'horizontal'
+//     },
+//     Ship {
+//       damage: 0,
+//       sunk: false,
+//       targetedSquares: [],
+//       length: 5,
+//       placement: [ 'E4', 'E5', 'E6', 'E7', 'E8' ],
+//       type: 'carrier',
+//       orientation: 'vertical'
+//     }
+//   ]
+//   [
+//     'A9',  'A10', 'H10', 'I10',
+//     'J10', 'A1',  'A2',  'A3',
+//     'G1',  'H1',  'I1',  'J1',
+//     'E4',  'E5',  'E6',  'E7',
+//     'E8'
 //   ]
