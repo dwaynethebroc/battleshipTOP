@@ -58,8 +58,9 @@ class Gameboard {
         this.board = this.createBoard();
         this.ships = [];
         this.occupiedCells = [];
-        this.guesses = [];
+        this.playersGuesses = [];
         this.missedAttacks = [];
+        this.opponentsGuesses;
         this.uppercaseLetters = [
             " ",
             "A",
@@ -456,10 +457,16 @@ class Gameboard {
         return placement.some((item) => set1.has(item));
     }
 
-    promptAttack() {
-        const guess = prompt("Enter the coordinate you want to attack: ")
-            .trim()
-            .toUpperCase();
+    promptAttack(opponentsBoard) {
+        let guess;
+
+        while (guess === "" || !guess.match(/^([A-Z]+)(\d+)$/)) {
+            guess = prompt(
+                "Enter the coordinate you want to attack (for example: 'C7')",
+            )
+                .trim()
+                .toUpperCase();
+        }
 
         console.log(`\n Your answer is: "${guess}" \n`);
 
@@ -620,6 +627,18 @@ class Player {
             throw new Error("player type needs to be 'computer' or 'human'");
         }
     }
+}
+
+function gameSetup {
+
+}
+
+function gameTurn {
+
+}
+
+function gameEnd {
+    
 }
 const computer = new Player("computer");
 computer.gameSetup();
