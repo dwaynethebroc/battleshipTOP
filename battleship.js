@@ -60,7 +60,8 @@ class Gameboard {
         this.occupiedCells = [];
         this.playersGuesses = [];
         this.missedAttacks = [];
-        this.opponentsGuesses;
+        this.opponentsGuesses = [];
+        this.opponentsBoard = this.createBoard;
         this.uppercaseLetters = [
             " ",
             "A",
@@ -457,7 +458,7 @@ class Gameboard {
         return placement.some((item) => set1.has(item));
     }
 
-    promptAttack(opponentsBoard) {
+    promptAttack() {
         let guess;
 
         while (guess === "" || !guess.match(/^([A-Z]+)(\d+)$/)) {
@@ -473,11 +474,10 @@ class Gameboard {
         return guess;
     }
 
-    receiveAttack() {
-        const coordinates = promptAttack();
+    receiveAttack(coordinates) {
         const matchStart = coordinates.match(/^([A-Z]+)(\d+)$/);
 
-        const col = this.uppercaseLetters.indexOf(matchStart[1]); // Letter part (Columns)
+        const col = this.uppercaseLetters[indexOf(matchStart[1])]; // Letter part (Columns)
         const row = Number(matchStart[2]); // Number part (Rows)
 
         const hitFlag = this.occupiedCells.includes(coordinates);
@@ -494,16 +494,18 @@ class Gameboard {
                     this.guesses.push(coordinates);
                     const hit = ship.hit(coordinates);
                     if (hit) {
-                        this.board[row][col] = "X";
+                        this.opponentsBoard[row][col] = "✅";
                     }
                 }
             });
         } else {
             this.guesses.push(coordinates);
             this.missedAttacks.push(coordinates);
-            this.board[row][col] = "!";
+            this.opponentsBoard[row][col] = "❌";
             console.log(`missed shot, board updated`);
         }
+
+        this.printBoard(this.opponentsBoard);
     }
 
     allSunk() {
@@ -515,8 +517,10 @@ class Gameboard {
 
         if (allSunk.includes(false)) {
             console.log("All ships not sunk yet");
+            return false;
         } else {
             console.log("All ships have been sunk");
+            return true;
         }
     }
 
@@ -607,6 +611,10 @@ class Gameboard {
         });
     }
 
+    promptAttackComputer(){
+        
+    }
+
     
 }
 
@@ -635,11 +643,34 @@ function gameSetup {
     human.gameSetup();
     computer.gameSetup();
 
-    gameTurn(human, computer)
+    gameTurnHumanVsComputer(human, computer)
 }
 
-function gameTurn(human, computer) {
-    
+function gameTurnHumanVsComputer(human, computer) {
+    const whoGoesFirst = [human, computer];
+
+    const firstPlayer = whoGoesFirst[Math.round(Math.random())];
+    let secondPlayer;
+
+    if(firstPlayer === human){
+        secondPlayer = computer
+    } else {
+        secondPlayer = human;
+    }
+
+    while(!sunkFlag){
+        let sunkFlag = false;
+
+        if(firstPlayer === human){
+            const guess = firstPlayer.playerBoard.promptAttack();
+            secondPlayer.playerBoard.receiveAttack(guess);
+            sunkFlag = secondPlayer.playerBoard.allSunk();
+        } else if(firstPlayer === computer){
+            const guess = firstPlayer.playerBoard.promptAttackComputer();
+            secondPlayer.playerBoard.receiveAttack(guess);
+            sunkFlag = secondPlayer.playerBoard.allSunk();
+        }
+    }
 }
 
 function gameEnd {
