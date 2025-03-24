@@ -612,8 +612,19 @@ class Gameboard {
     }
 
     promptAttackComputer(){
+        let alreadyGuessed = true;
+        let row;
+        let col;
+        while(alreadyGuessed){
+            row = Math.floor(Math.random() * 10) + 1; //Numbers
+            col = this.uppercaseLetters[Math.floor(Math.random() * 10) + 1]; //Letters
+
+            alreadyGuessed = this.playersGuesses.includes(`${col}${row}`);
+        }
+
+        return `${col}${row}`
+        }
         
-    }
 
     
 }
