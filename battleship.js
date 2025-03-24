@@ -1,7 +1,7 @@
 // export { Ship, Gameboard };
-// import promptSync from "prompt-sync";
+import promptSync from "prompt-sync";
 
-// const prompt = promptSync();
+const prompt = promptSync();
 
 class Ship {
     constructor(length, placement, type, orientation) {
@@ -61,7 +61,7 @@ class Gameboard {
         this.playersGuesses = [];
         this.missedAttacks = [];
         this.opponentsGuesses = [];
-        this.opponentsBoard = this.createBoard;
+        this.opponentsBoard = this.createBoard();
         this.uppercaseLetters = [
             " ",
             "A",
@@ -458,56 +458,6 @@ class Gameboard {
         return placement.some((item) => set1.has(item));
     }
 
-    promptAttack() {
-        let guess;
-
-        while (guess === "" || !guess.match(/^([A-Z]+)(\d+)$/)) {
-            guess = prompt(
-                "Enter the coordinate you want to attack (for example: 'C7')",
-            )
-                .trim()
-                .toUpperCase();
-        }
-
-        console.log(`\n Your answer is: "${guess}" \n`);
-
-        return guess;
-    }
-
-    receiveAttack(coordinates) {
-        const matchStart = coordinates.match(/^([A-Z]+)(\d+)$/);
-
-        const col = this.uppercaseLetters[indexOf(matchStart[1])]; // Letter part (Columns)
-        const row = Number(matchStart[2]); // Number part (Rows)
-
-        const hitFlag = this.occupiedCells.includes(coordinates);
-        const alreadyGuessed = this.guesses.includes(coordinates);
-
-        if (alreadyGuessed) {
-            console.log(
-                "this coordinate has already been guessed please pick another option",
-            );
-            this.receiveAttack();
-        } else if (hitFlag && !alreadyGuessed) {
-            this.ships.forEach((ship) => {
-                if (ship.placement.includes(coordinates)) {
-                    this.guesses.push(coordinates);
-                    const hit = ship.hit(coordinates);
-                    if (hit) {
-                        this.opponentsBoard[row][col] = "✅";
-                    }
-                }
-            });
-        } else {
-            this.guesses.push(coordinates);
-            this.missedAttacks.push(coordinates);
-            this.opponentsBoard[row][col] = "❌";
-            console.log(`missed shot, board updated`);
-        }
-
-        this.printBoard(this.opponentsBoard);
-    }
-
     allSunk() {
         let allSunk = [];
 
@@ -611,22 +561,79 @@ class Gameboard {
         });
     }
 
-    promptAttackComputer(){
+    promptAttack() {
+        let guess = prompt(
+            "Enter the coordinate you want to attack (for example: 'C7')",
+        )
+            .trim()
+            .toUpperCase();
+
+        while (guess === "" || !guess.match(/^([A-Z]+)(\d+)$/)) {
+            guess = prompt(
+                "Enter the coordinate you want to attack (for example: 'C7')",
+            )
+                .trim()
+                .toUpperCase();
+        }
+
+        console.log(`\n Your answer is: "${guess}" \n`);
+
+        return guess;
+    }
+
+    promptAttackComputer() {
         let alreadyGuessed = true;
         let row;
         let col;
-        while(alreadyGuessed){
+        while (alreadyGuessed) {
             row = Math.floor(Math.random() * 10) + 1; //Numbers
             col = this.uppercaseLetters[Math.floor(Math.random() * 10) + 1]; //Letters
 
             alreadyGuessed = this.playersGuesses.includes(`${col}${row}`);
         }
 
-        return `${col}${row}`
-        }
-        
+        return `${col}${row}`;
+    }
 
-    
+    receiveAttack(coordinates) {
+        const matchStart = coordinates.match(/^([A-Z]+)(\d+)$/);
+
+        console.log(matchStart[1]);
+        console.log(matchStart[2]);
+
+        const colIndex = this.uppercaseLetters.indexOf(matchStart[1]); //Letter part(Columns)
+        const col = this.uppercaseLetters[colIndex]; // Letter part (Columns)
+        const row = Number(matchStart[2]); // Number part (Rows)
+
+        console.log(`${row}${col}`);
+
+        const hitFlag = this.occupiedCells.includes(coordinates);
+        const alreadyGuessed = this.playersGuesses.includes(coordinates);
+
+        if (alreadyGuessed) {
+            console.log(
+                "this coordinate has already been guessed please pick another option",
+            );
+            this.receiveAttack();
+        } else if (hitFlag && !alreadyGuessed) {
+            this.ships.forEach((ship) => {
+                if (ship.placement.includes(coordinates)) {
+                    this.playersGuesses.push(coordinates);
+                    const hit = ship.hit(coordinates);
+                    if (hit) {
+                        this.opponentsBoard[row][colIndex] = "!";
+                    }
+                }
+            });
+        } else {
+            this.playersGuesses.push(coordinates);
+            this.missedAttacks.push(coordinates);
+            this.opponentsBoard[row][colIndex] = "X";
+            console.log(`missed shot, board updated`);
+        }
+
+        this.printBoard(this.opponentsBoard);
+    }
 }
 
 class Player {
@@ -647,14 +654,14 @@ class Player {
     }
 }
 
-function gameSetup {
+function gameSetup() {
     const human = new Player("human");
     const computer = new Player("computer");
 
     human.gameSetup();
     computer.gameSetup();
 
-    gameTurnHumanVsComputer(human, computer)
+    gameTurnHumanVsComputer(human, computer);
 }
 
 function gameTurnHumanVsComputer(human, computer) {
@@ -663,20 +670,29 @@ function gameTurnHumanVsComputer(human, computer) {
     const firstPlayer = whoGoesFirst[Math.round(Math.random())];
     let secondPlayer;
 
-    if(firstPlayer === human){
-        secondPlayer = computer
+    if (firstPlayer === human) {
+        secondPlayer = computer;
     } else {
         secondPlayer = human;
     }
 
-    while(!sunkFlag){
-        let sunkFlag = false;
+    console.log(`First: ${firstPlayer.playerType}`);
+    console.log(`Second: ${secondPlayer.playerType}`);
 
-        if(firstPlayer === human){
+    let sunkFlag = false;
+
+    while (!sunkFlag) {
+        if (firstPlayer === human) {
+            firstPlayer.playerBoard.printBoard(
+                firstPlayer.playerBoard.opponentsBoard,
+            );
             const guess = firstPlayer.playerBoard.promptAttack();
             secondPlayer.playerBoard.receiveAttack(guess);
             sunkFlag = secondPlayer.playerBoard.allSunk();
-        } else if(firstPlayer === computer){
+        } else if (firstPlayer === computer) {
+            firstPlayer.playerBoard.printBoard(
+                firstPlayer.playerBoard.opponentsBoard,
+            );
             const guess = firstPlayer.playerBoard.promptAttackComputer();
             secondPlayer.playerBoard.receiveAttack(guess);
             sunkFlag = secondPlayer.playerBoard.allSunk();
@@ -684,11 +700,6 @@ function gameTurnHumanVsComputer(human, computer) {
     }
 }
 
-function gameEnd {
+function gameEnd() {}
 
-}
-
-const computer = new Player("computer");
-computer.gameSetup();
-console.log(computer.playerBoard.ships);
-console.log(computer.playerBoard.occupiedCells);
+gameSetup();
