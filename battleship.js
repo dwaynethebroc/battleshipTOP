@@ -523,9 +523,15 @@ class Gameboard {
     boardSetupHuman() {
         //Setup the board
         this.placeShip();
+    }
 
-        //Move to game mode
-        this.gameTurn();
+    verticalOrHorizontal() {
+        const vertHorizontal = ["vertical", "horizontal"];
+
+        const verticalOrHorizontal = vertHorizontal[Math.round(Math.random())];
+
+        console.log(verticalOrHorizontal);
+        return verticalOrHorizontal;
     }
 
     boardSetupComputer() {
@@ -601,14 +607,7 @@ class Gameboard {
         });
     }
 
-    verticalOrHorizontal() {
-        const vertHorizontal = ["vertical", "horizontal"];
-
-        const verticalOrHorizontal = vertHorizontal[Math.round(Math.random())];
-
-        console.log(verticalOrHorizontal);
-        return verticalOrHorizontal;
-    }
+    
 }
 
 class Player {
@@ -630,16 +629,23 @@ class Player {
 }
 
 function gameSetup {
+    const human = new Player("human");
+    const computer = new Player("computer");
 
+    human.gameSetup();
+    computer.gameSetup();
+
+    gameTurn(human, computer)
 }
 
-function gameTurn {
-
+function gameTurn(human, computer) {
+    
 }
 
 function gameEnd {
-    
+
 }
+
 const computer = new Player("computer");
 computer.gameSetup();
 console.log(computer.playerBoard.ships);
