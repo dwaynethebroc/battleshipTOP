@@ -679,7 +679,6 @@ function gameTurnHumanVsComputer(human, computer) {
     console.log(`First: ${firstPlayer.playerType}`);
     console.log(`Second: ${secondPlayer.playerType}`);
 
-    const orderOfTurns = [firstPlayer, secondPlayer];
     let whosTurn = firstPlayer;
 
     let sunkFlag = false;
@@ -709,8 +708,8 @@ function gameTurnHumanVsComputer(human, computer) {
                     secondPlayer.playerBoard.opponentsBoard,
                 );
                 const guess = secondPlayer.playerBoard.promptAttack();
-                secondPlayer.playerBoard.receiveAttack(guess);
-                sunkFlag = secondPlayer.playerBoard.allSunk();
+                firstPlayer.playerBoard.receiveAttack(guess);
+                sunkFlag = firstPlayer.playerBoard.allSunk();
             } else if (secondPlayer === computer) {
                 secondPlayer.playerBoard.printBoard(
                     secondPlayer.playerBoard.opponentsBoard,
@@ -723,6 +722,8 @@ function gameTurnHumanVsComputer(human, computer) {
             whosTurn = firstPlayer;
         }
     }
+
+    gameEnd();
 }
 
 function gameEnd() {}
