@@ -632,7 +632,7 @@ class Gameboard {
             console.log(`missed shot, board updated`);
         }
 
-        this.printBoard(this.opponentsBoard);
+        // this.printBoard(this.opponentsBoard);
     }
 }
 
@@ -679,23 +679,48 @@ function gameTurnHumanVsComputer(human, computer) {
     console.log(`First: ${firstPlayer.playerType}`);
     console.log(`Second: ${secondPlayer.playerType}`);
 
+    const orderOfTurns = [firstPlayer, secondPlayer];
+    let whosTurn = firstPlayer;
+
     let sunkFlag = false;
 
     while (!sunkFlag) {
-        if (firstPlayer === human) {
-            firstPlayer.playerBoard.printBoard(
-                firstPlayer.playerBoard.opponentsBoard,
-            );
-            const guess = firstPlayer.playerBoard.promptAttack();
-            secondPlayer.playerBoard.receiveAttack(guess);
-            sunkFlag = secondPlayer.playerBoard.allSunk();
-        } else if (firstPlayer === computer) {
-            firstPlayer.playerBoard.printBoard(
-                firstPlayer.playerBoard.opponentsBoard,
-            );
-            const guess = firstPlayer.playerBoard.promptAttackComputer();
-            secondPlayer.playerBoard.receiveAttack(guess);
-            sunkFlag = secondPlayer.playerBoard.allSunk();
+        if (whosTurn === firstPlayer) {
+            if (firstPlayer === human) {
+                firstPlayer.playerBoard.printBoard(
+                    firstPlayer.playerBoard.opponentsBoard,
+                );
+                const guess = firstPlayer.playerBoard.promptAttack();
+                secondPlayer.playerBoard.receiveAttack(guess);
+                sunkFlag = secondPlayer.playerBoard.allSunk();
+            } else if (firstPlayer === computer) {
+                firstPlayer.playerBoard.printBoard(
+                    firstPlayer.playerBoard.opponentsBoard,
+                );
+                const guess = firstPlayer.playerBoard.promptAttackComputer();
+                secondPlayer.playerBoard.receiveAttack(guess);
+                sunkFlag = secondPlayer.playerBoard.allSunk();
+            }
+
+            whosTurn = secondPlayer;
+        } else if (whosTurn === secondPlayer) {
+            if (secondPlayer === human) {
+                secondPlayer.playerBoard.printBoard(
+                    secondPlayer.playerBoard.opponentsBoard,
+                );
+                const guess = secondPlayer.playerBoard.promptAttack();
+                secondPlayer.playerBoard.receiveAttack(guess);
+                sunkFlag = secondPlayer.playerBoard.allSunk();
+            } else if (secondPlayer === computer) {
+                secondPlayer.playerBoard.printBoard(
+                    secondPlayer.playerBoard.opponentsBoard,
+                );
+                const guess = secondPlayer.playerBoard.promptAttackComputer();
+                firstPlayer.playerBoard.receiveAttack(guess);
+                sunkFlag = firstPlayer.playerBoard.allSunk();
+            }
+
+            whosTurn = firstPlayer;
         }
     }
 }
