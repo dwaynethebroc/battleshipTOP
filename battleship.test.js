@@ -1,5 +1,5 @@
-// import { Ship, Gameboard } from "./battleship.js";
-// import promptSync from "prompt-sync";
+import { Ship, Gameboard } from "./battleship.js";
+import promptSync from "prompt-sync";
 
 jest.mock(
     "prompt-sync",

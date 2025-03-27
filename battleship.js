@@ -1,7 +1,39 @@
 // export { Ship, Gameboard };
 import promptSync from "prompt-sync";
+import { styleText } from "node:util";
 
 const prompt = promptSync();
+
+// Reset = "\x1b[0m"
+// Bright = "\x1b[1m"
+// Dim = "\x1b[2m"
+// Underscore = "\x1b[4m"
+// Blink = "\x1b[5m"
+// Reverse = "\x1b[7m"
+// Hidden = "\x1b[8m"
+
+// FgBlack = "\x1b[30m"
+// FgRed = "\x1b[31m"
+// FgGreen = "\x1b[32m"
+// FgYellow = "\x1b[33m"
+// FgBlue = "\x1b[34m"
+// FgMagenta = "\x1b[35m"
+// FgCyan = "\x1b[36m"
+// FgWhite = "\x1b[37m"
+// FgGray = "\x1b[90m"
+
+// BgBlack = "\x1b[40m"
+// BgRed = "\x1b[41m"
+// BgGreen = "\x1b[42m"
+// BgYellow = "\x1b[43m"
+// BgBlue = "\x1b[44m"
+// BgMagenta = "\x1b[45m"
+// BgCyan = "\x1b[46m"
+// BgWhite = "\x1b[47m"
+// BgGray = "\x1b[100m"
+
+// console.log('\x1b[36m%s\x1b[0m', 'I am cyan');  //cyan
+// console.log('\x1b[33m%s\x1b[0m', stringToMakeYellow);  //yellow
 
 class Ship {
     constructor(length, placement, type, orientation) {
@@ -724,83 +756,19 @@ function gameSetup() {
     gameTurnHumanVsComputer(human, computer);
 }
 
-// function gameTurnHumanVsComputer(human, computer) {
-//     const whoGoesFirst = [human, computer];
-
-//     const firstPlayer = whoGoesFirst[Math.round(Math.random())];
-//     let secondPlayer;
-
-//     //computers opponents board is updated with human players ship placement, opponents guesses should update on that board as well
-//     if (firstPlayer === human) {
-//         secondPlayer = computer;
-//         secondPlayer.playerBoard.opponentsBoard = firstPlayer.playerBoard.board; //update computer opponents board to humans board ship placement
-//     } else {
-//         secondPlayer = human;
-//         firstPlayer.playerBoard.opponentsBoard = secondPlayer.playerBoard.board; //update computer opponents board to humans board ship placement
-//     }
-
-//     console.log(`First: ${firstPlayer.playerType}`);
-//     console.log(`Second: ${secondPlayer.playerType}`);
-
-//     let whosTurn = firstPlayer;
-
-//     let sunkFlag = false;
-
-//     while (!sunkFlag) {
-//         if (whosTurn === firstPlayer) {
-//             if (firstPlayer === human) {
-//                 firstPlayer.playerBoard.printBoard(
-//                     firstPlayer.playerBoard.opponentsBoard,
-//                 );
-//                 const guess = firstPlayer.playerBoard.promptAttack();
-//                 secondPlayer.playerBoard.receiveAttack(guess);
-//                 sunkFlag = secondPlayer.playerBoard.allSunk();
-//             } else if (firstPlayer === computer) {
-//                 firstPlayer.playerBoard.printBoard(
-//                     firstPlayer.playerBoard.opponentsBoard,
-//                 );
-//                 const guess = firstPlayer.playerBoard.promptAttackComputer();
-//                 secondPlayer.playerBoard.receiveAttack(guess);
-//                 sunkFlag = secondPlayer.playerBoard.allSunk();
-//             }
-
-//             whosTurn = secondPlayer;
-
-//             console.log("Next Turn:", whosTurn.playerType);
-//         } else if (whosTurn === secondPlayer) {
-//             if (secondPlayer === human) {
-//                 secondPlayer.playerBoard.printBoard(
-//                     secondPlayer.playerBoard.opponentsBoard,
-//                 );
-//                 const guess = secondPlayer.playerBoard.promptAttack();
-//                 firstPlayer.playerBoard.receiveAttack(guess);
-//                 sunkFlag = firstPlayer.playerBoard.allSunk();
-//             } else if (secondPlayer === computer) {
-//                 secondPlayer.playerBoard.printBoard(
-//                     secondPlayer.playerBoard.opponentsBoard,
-//                 );
-//                 const guess = secondPlayer.playerBoard.promptAttackComputer();
-//                 firstPlayer.playerBoard.receiveAttack(guess);
-//                 sunkFlag = firstPlayer.playerBoard.allSunk();
-//             }
-
-//             whosTurn = firstPlayer;
-
-//             console.log("Next Turn:", whosTurn.playerType);
-//         }
-//     }
-
-//     gameEnd();
-// }
-
 function gameTurnHumanVsComputer(human, computer) {
     let whosTurn = Math.random() < 0.5 ? human : computer;
     let gameOver = false;
+
+    computer.playerBoard.opponentsBoard = human.playerBoard.board;
 
     while (!gameOver) {
         if (whosTurn === human) {
             // Human's turn
             human.playerBoard.printBoard(human.playerBoard.opponentsBoard);
+            computer.playerBoard.printBoard(
+                computer.playerBoard.opponentsBoard,
+            );
             const guess = human.playerBoard.promptAttack();
             const result = computer.playerBoard.receiveAttack(guess);
 
@@ -811,7 +779,11 @@ function gameTurnHumanVsComputer(human, computer) {
                 ];
                 const colIndex =
                     human.playerBoard.uppercaseLetters.indexOf(col);
-                human.playerBoard.opponentsBoard[row][colIndex] = "X";
+                // human.playerBoard.opponentsBoard[row][colIndex] = "X";
+                human.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    "red",
+                    "X",
+                );
                 console.log(`Hit at ${result.coordinates}!`);
             } else if (result.result === "miss") {
                 const [col, row] = [
@@ -820,7 +792,12 @@ function gameTurnHumanVsComputer(human, computer) {
                 ];
                 const colIndex =
                     human.playerBoard.uppercaseLetters.indexOf(col);
-                human.playerBoard.opponentsBoard[row][colIndex] = "O";
+                // human.playerBoard.opponentsBoard[row][colIndex] = "O";
+                human.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    "blue",
+                    "O",
+                );
+
                 console.log(`Miss at ${result.coordinates}.`);
             } else {
                 console.log("Invalid or already guessed coordinate.");
@@ -844,7 +821,11 @@ function gameTurnHumanVsComputer(human, computer) {
                 ];
                 const colIndex =
                     computer.playerBoard.uppercaseLetters.indexOf(col);
-                computer.playerBoard.opponentsBoard[row][colIndex] = "X";
+                // computer.playerBoard.opponentsBoard[row][colIndex] = "X";
+                computer.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    "red",
+                    "X",
+                );
                 console.log(`Computer hit at ${result.coordinates}!`);
             } else if (result.result === "miss") {
                 const [col, row] = [
@@ -853,7 +834,11 @@ function gameTurnHumanVsComputer(human, computer) {
                 ];
                 const colIndex =
                     computer.playerBoard.uppercaseLetters.indexOf(col);
-                computer.playerBoard.opponentsBoard[row][colIndex] = "O";
+                // computer.playerBoard.opponentsBoard[row][colIndex] = "O";
+                computer.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    "blue",
+                    "O",
+                );
                 console.log(`Computer missed at ${result.coordinates}.`);
             }
 
