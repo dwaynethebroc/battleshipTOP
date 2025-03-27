@@ -58,12 +58,13 @@ class Ship {
 }
 
 class Gameboard {
-    constructor(player) {
+    constructor(player, name, gameMode) {
         this.playerType = player;
+        this.name = name;
+        this.gameMode = gameMode;
 
         this.board = this.createBoard();
         this.opponentsBoard = this.createBoard();
-
         this.ships = [];
         this.occupiedCells = [];
         this.playersGuesses = [];
@@ -119,20 +120,36 @@ class Gameboard {
     }
 
     printBoard(board) {
-        if (board === this.board && this.playerType === "human") {
+        if (
+            board === this.board &&
+            this.playerType === "human" &&
+            this.gameMode === "vsComputer"
+        ) {
             console.log(`\n      Your Board      \n`);
         } else if (
             board === this.opponentsBoard &&
-            this.playerType === "human"
+            this.playerType === "human" &&
+            this.gameMode === "vsComputer"
         ) {
             console.log(`\n      Your Guesses \n`);
-        } else if (board === this.board && this.playerType === "computer") {
+        } else if (
+            board === this.board &&
+            this.playerType === "computer" &&
+            this.gameMode === "vsComputer"
+        ) {
             console.log(`\n      Opponents Board \n`);
         } else if (
             board === this.opponentsBoard &&
-            this.playerType === "computer"
+            this.playerType === "computer" &&
+            this.gameMode === "vsComputer"
         ) {
             console.log(`\n      Opponents Guesses \n`);
+        } else if (
+            board === this.opponentsBoard &&
+            this.playerType === "human" &&
+            this.gameMode === "PVP"
+        ) {
+            console.log(`\n      ${this.name}'s Guesses \n`);
         }
 
         board.forEach((row) => console.log(row.join(" ")));
@@ -631,8 +648,10 @@ class Gameboard {
 }
 
 class Player {
-    constructor(playerType) {
-        this.playerBoard = new Gameboard(playerType);
+    constructor(playerType, name, gameMode) {
+        this.playerBoard = new Gameboard(playerType, name, gameMode);
+        this.name = name;
+        this.gameMode = gameMode;
 
         this.playerType = playerType;
     }
@@ -650,6 +669,9 @@ class Player {
 
 function gameMode() {
     let gameType;
+    let name;
+    let name1;
+    let name2;
 
     do {
         gameType = prompt(
@@ -668,9 +690,19 @@ function gameMode() {
 
     switch (gameType) {
         case "1":
+            do {
+                name = prompt("\nWhat is your name admiral \n Enter here: ");
+
+                if (name === null) return; // Handle cancel action
+
+                name = name.trim();
+
+                console.log(`Game type: ${name}`);
+            } while (!name.match(/^\w+$/));
+
             console.log("You have chosen 'Vs Computer game mode'");
-            const human = new Player("human");
-            const computer = new Player("computer");
+            const human = new Player("human", name, "vsComputer");
+            const computer = new Player("computer", "computer", "vsComputer");
 
             human.gameSetup();
             computer.gameSetup();
@@ -679,9 +711,29 @@ function gameMode() {
             break;
 
         case "2":
+            do {
+                name1 = prompt("\nWhat is player 1's name \n Enter here: ");
+
+                if (name1 === null) return; // Handle cancel action
+
+                name1 = name1.trim();
+
+                console.log(`You have selected the name: ${name1}`);
+            } while (!name1.match(/^\w+$/));
+
+            do {
+                name2 = prompt("\nWhat is player 2's name \n Enter here: ");
+
+                if (name2 === null) return; // Handle cancel action
+
+                name2 = name2.trim();
+
+                console.log(`You have selected the name: ${name2}`);
+            } while (!name2.match(/^\w+$/));
+
             console.log("You have chosen 'PVP game mode'");
-            const player1 = new Player("human");
-            const player2 = new Player("human");
+            const player1 = new Player("human", name1, "PVP");
+            const player2 = new Player("human", name2, "PVP");
 
             player1.gameSetup();
             player2.gameSetup();
