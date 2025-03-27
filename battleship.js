@@ -897,8 +897,8 @@ function gameTurnPlayerVsPlayer(player1, player2) {
             whosTurn = player2;
         } else if (whosTurn === player2) {
             // Player 2's turn
-            player2.playerBoard.printBoard(player2.playerBoard.opponentsBoard);
-            player1.playerBoard.printBoard(player1.playerBoard.opponentsBoard);
+            player1.playerBoard.printBoard(player2.playerBoard.opponentsBoard);
+            player2.playerBoard.printBoard(player1.playerBoard.opponentsBoard);
             const guess = player2.playerBoard.promptAttack();
             const result = player1.playerBoard.receiveAttack(guess);
 
