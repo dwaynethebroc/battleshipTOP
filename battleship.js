@@ -4,37 +4,6 @@ import { styleText } from "node:util";
 
 const prompt = promptSync();
 
-// Reset = "\x1b[0m"
-// Bright = "\x1b[1m"
-// Dim = "\x1b[2m"
-// Underscore = "\x1b[4m"
-// Blink = "\x1b[5m"
-// Reverse = "\x1b[7m"
-// Hidden = "\x1b[8m"
-
-// FgBlack = "\x1b[30m"
-// FgRed = "\x1b[31m"
-// FgGreen = "\x1b[32m"
-// FgYellow = "\x1b[33m"
-// FgBlue = "\x1b[34m"
-// FgMagenta = "\x1b[35m"
-// FgCyan = "\x1b[36m"
-// FgWhite = "\x1b[37m"
-// FgGray = "\x1b[90m"
-
-// BgBlack = "\x1b[40m"
-// BgRed = "\x1b[41m"
-// BgGreen = "\x1b[42m"
-// BgYellow = "\x1b[43m"
-// BgBlue = "\x1b[44m"
-// BgMagenta = "\x1b[45m"
-// BgCyan = "\x1b[46m"
-// BgWhite = "\x1b[47m"
-// BgGray = "\x1b[100m"
-
-// console.log('\x1b[36m%s\x1b[0m', 'I am cyan');  //cyan
-// console.log('\x1b[33m%s\x1b[0m', stringToMakeYellow);  //yellow
-
 class Ship {
     constructor(length, placement, type, orientation) {
         //properties
@@ -747,13 +716,24 @@ class Player {
 }
 
 function gameSetup() {
-    const human = new Player("human");
-    const computer = new Player("computer");
+    let whichKindOfGame = null;
+    while (whichKindOfGame !== "1" || whichKindOfGame !== "2") {
+        whichKindOfGame = prompt(
+            "What kind of game do you want to play? \n Press 1 or 2 and then hit enter: \n 1) Player vs Computer \n 2) Player vs Player",
+        );
+    }
+    if (whichKindOfGame === "1") {
+        const human = new Player("human");
+        const computer = new Player("computer");
 
-    human.gameSetup();
-    computer.gameSetup();
+        human.gameSetup();
+        computer.gameSetup();
 
-    gameTurnHumanVsComputer(human, computer);
+        gameTurnHumanVsComputer(human, computer);
+    } else {
+        const player1 = new Player("human");
+        const player2 = new Player("human");
+    }
 }
 
 function gameTurnHumanVsComputer(human, computer) {
@@ -850,7 +830,5 @@ function gameTurnHumanVsComputer(human, computer) {
         }
     }
 }
-
-function gameEnd() {}
 
 gameSetup();
