@@ -30,6 +30,9 @@ class Ship {
         if (hitShip) {
             this.damage++;
             this.targetedSquares.push(square);
+            if (this.isSunk()) {
+                console.log(`${this.type.toUpperCase()} has been sunk!`);
+            }
             return true;
         } else {
             return false;
@@ -54,14 +57,18 @@ class Ship {
 }
 
 class Gameboard {
-    constructor() {
+    constructor(player) {
+        this.playerType = player;
+
         this.board = this.createBoard();
+        this.opponentsBoard = this.createBoard();
+
         this.ships = [];
         this.occupiedCells = [];
         this.playersGuesses = [];
         this.missedAttacks = [];
         this.opponentsGuesses = [];
-        this.opponentsBoard = this.createBoard();
+
         this.uppercaseLetters = [
             " ",
             "A",
@@ -111,7 +118,22 @@ class Gameboard {
     }
 
     printBoard(board) {
-        console.log(`\n       YOUR BOARD \n`);
+        if (board === this.board && this.playerType === "human") {
+            console.log(`\n      Your Board      \n`);
+        } else if (
+            board === this.opponentsBoard &&
+            this.playerType === "human"
+        ) {
+            console.log(`\n      Your Guesses \n`);
+        } else if (board === this.board && this.playerType === "computer") {
+            console.log(`\n      Opponents Board \n`);
+        } else if (
+            board === this.opponentsBoard &&
+            this.playerType === "computer"
+        ) {
+            console.log(`\n      Opponents Guesses \n`);
+        }
+
         board.forEach((row) => console.log(row.join(" ")));
     }
 
@@ -557,7 +579,7 @@ class Gameboard {
             this.ships.push(
                 new Ship(ship.length, placement, ship.type, orientationOfShip),
             );
-            this.printBoard(this.board);
+            // this.printBoard(this.board);
         });
     }
 
@@ -595,50 +617,88 @@ class Gameboard {
         return `${col}${row}`;
     }
 
+    // receiveAttack(coordinates) {
+    //     const matchStart = coordinates.match(/^([A-Z]+)(\d+)$/);
+
+    //     console.log(matchStart[1]);
+    //     console.log(matchStart[2]);
+
+    //     const colIndex = this.uppercaseLetters.indexOf(matchStart[1]); //Letter part(Columns)
+    //     const col = this.uppercaseLetters[colIndex]; // Letter part (Columns)
+    //     const row = Number(matchStart[2]); // Number part (Rows)
+
+    //     console.log(`${row}${col}`);
+
+    //     const hitFlag = this.occupiedCells.includes(coordinates);
+    //     const alreadyGuessed = this.playersGuesses.includes(coordinates);
+
+    //     if (alreadyGuessed) {
+    //         console.log(
+    //             "this coordinate has already been guessed please pick another option",
+    //         );
+    //         this.receiveAttack();
+    //     } else if (hitFlag && !alreadyGuessed) {
+    //         this.ships.forEach((ship) => {
+    //             if (ship.placement.includes(coordinates)) {
+    //                 this.playersGuesses.push(coordinates);
+    //                 const hit = ship.hit(coordinates);
+    //                 if (hit) {
+    //                     this.opponentsBoard[row][colIndex] = "X";
+    //                 }
+    //             }
+    //         });
+    //     } else {
+    //         this.playersGuesses.push(coordinates);
+    //         this.missedAttacks.push(coordinates);
+    //         this.opponentsBoard[row][colIndex] = "O";
+    //         console.log(`missed shot, board updated`);
+    //     }
+    // }
+
     receiveAttack(coordinates) {
         const matchStart = coordinates.match(/^([A-Z]+)(\d+)$/);
-
-        console.log(matchStart[1]);
-        console.log(matchStart[2]);
-
-        const colIndex = this.uppercaseLetters.indexOf(matchStart[1]); //Letter part(Columns)
-        const col = this.uppercaseLetters[colIndex]; // Letter part (Columns)
-        const row = Number(matchStart[2]); // Number part (Rows)
-
-        console.log(`${row}${col}`);
-
-        const hitFlag = this.occupiedCells.includes(coordinates);
-        const alreadyGuessed = this.playersGuesses.includes(coordinates);
-
-        if (alreadyGuessed) {
-            console.log(
-                "this coordinate has already been guessed please pick another option",
-            );
-            this.receiveAttack();
-        } else if (hitFlag && !alreadyGuessed) {
-            this.ships.forEach((ship) => {
-                if (ship.placement.includes(coordinates)) {
-                    this.playersGuesses.push(coordinates);
-                    const hit = ship.hit(coordinates);
-                    if (hit) {
-                        this.opponentsBoard[row][colIndex] = "!";
-                    }
-                }
-            });
-        } else {
-            this.playersGuesses.push(coordinates);
-            this.missedAttacks.push(coordinates);
-            this.opponentsBoard[row][colIndex] = "X";
-            console.log(`missed shot, board updated`);
+        if (!matchStart) {
+            return { result: "invalid", coordinates };
         }
 
-        // this.printBoard(this.opponentsBoard);
+        const col = matchStart[1];
+        const row = Number(matchStart[2]);
+        const colIndex = this.uppercaseLetters.indexOf(col);
+
+        if (colIndex === -1 || row < 1 || row > 10) {
+            return { result: "invalid", coordinates };
+        }
+
+        const alreadyGuessed = this.playersGuesses.includes(coordinates);
+        if (alreadyGuessed) {
+            return { result: "alreadyGuessed", coordinates };
+        }
+
+        this.playersGuesses.push(coordinates);
+
+        const hitFlag = this.occupiedCells.includes(coordinates);
+        if (hitFlag) {
+            let shipHit = null;
+            for (const ship of this.ships) {
+                if (ship.placement.includes(coordinates)) {
+                    shipHit = ship;
+                    break;
+                }
+            }
+            if (shipHit) {
+                shipHit.hit(coordinates);
+                return { result: "hit", coordinates };
+            }
+        }
+
+        this.missedAttacks.push(coordinates);
+        return { result: "miss", coordinates };
     }
 }
 
 class Player {
     constructor(playerType) {
-        this.playerBoard = new Gameboard();
+        this.playerBoard = new Gameboard(playerType);
 
         this.playerType = playerType;
     }
@@ -664,66 +724,146 @@ function gameSetup() {
     gameTurnHumanVsComputer(human, computer);
 }
 
+// function gameTurnHumanVsComputer(human, computer) {
+//     const whoGoesFirst = [human, computer];
+
+//     const firstPlayer = whoGoesFirst[Math.round(Math.random())];
+//     let secondPlayer;
+
+//     //computers opponents board is updated with human players ship placement, opponents guesses should update on that board as well
+//     if (firstPlayer === human) {
+//         secondPlayer = computer;
+//         secondPlayer.playerBoard.opponentsBoard = firstPlayer.playerBoard.board; //update computer opponents board to humans board ship placement
+//     } else {
+//         secondPlayer = human;
+//         firstPlayer.playerBoard.opponentsBoard = secondPlayer.playerBoard.board; //update computer opponents board to humans board ship placement
+//     }
+
+//     console.log(`First: ${firstPlayer.playerType}`);
+//     console.log(`Second: ${secondPlayer.playerType}`);
+
+//     let whosTurn = firstPlayer;
+
+//     let sunkFlag = false;
+
+//     while (!sunkFlag) {
+//         if (whosTurn === firstPlayer) {
+//             if (firstPlayer === human) {
+//                 firstPlayer.playerBoard.printBoard(
+//                     firstPlayer.playerBoard.opponentsBoard,
+//                 );
+//                 const guess = firstPlayer.playerBoard.promptAttack();
+//                 secondPlayer.playerBoard.receiveAttack(guess);
+//                 sunkFlag = secondPlayer.playerBoard.allSunk();
+//             } else if (firstPlayer === computer) {
+//                 firstPlayer.playerBoard.printBoard(
+//                     firstPlayer.playerBoard.opponentsBoard,
+//                 );
+//                 const guess = firstPlayer.playerBoard.promptAttackComputer();
+//                 secondPlayer.playerBoard.receiveAttack(guess);
+//                 sunkFlag = secondPlayer.playerBoard.allSunk();
+//             }
+
+//             whosTurn = secondPlayer;
+
+//             console.log("Next Turn:", whosTurn.playerType);
+//         } else if (whosTurn === secondPlayer) {
+//             if (secondPlayer === human) {
+//                 secondPlayer.playerBoard.printBoard(
+//                     secondPlayer.playerBoard.opponentsBoard,
+//                 );
+//                 const guess = secondPlayer.playerBoard.promptAttack();
+//                 firstPlayer.playerBoard.receiveAttack(guess);
+//                 sunkFlag = firstPlayer.playerBoard.allSunk();
+//             } else if (secondPlayer === computer) {
+//                 secondPlayer.playerBoard.printBoard(
+//                     secondPlayer.playerBoard.opponentsBoard,
+//                 );
+//                 const guess = secondPlayer.playerBoard.promptAttackComputer();
+//                 firstPlayer.playerBoard.receiveAttack(guess);
+//                 sunkFlag = firstPlayer.playerBoard.allSunk();
+//             }
+
+//             whosTurn = firstPlayer;
+
+//             console.log("Next Turn:", whosTurn.playerType);
+//         }
+//     }
+
+//     gameEnd();
+// }
+
 function gameTurnHumanVsComputer(human, computer) {
-    const whoGoesFirst = [human, computer];
+    let whosTurn = Math.random() < 0.5 ? human : computer;
+    let gameOver = false;
 
-    const firstPlayer = whoGoesFirst[Math.round(Math.random())];
-    let secondPlayer;
+    while (!gameOver) {
+        if (whosTurn === human) {
+            // Human's turn
+            human.playerBoard.printBoard(human.playerBoard.opponentsBoard);
+            const guess = human.playerBoard.promptAttack();
+            const result = computer.playerBoard.receiveAttack(guess);
 
-    if (firstPlayer === human) {
-        secondPlayer = computer;
-    } else {
-        secondPlayer = human;
-    }
-
-    console.log(`First: ${firstPlayer.playerType}`);
-    console.log(`Second: ${secondPlayer.playerType}`);
-
-    let whosTurn = firstPlayer;
-
-    let sunkFlag = false;
-
-    while (!sunkFlag) {
-        if (whosTurn === firstPlayer) {
-            if (firstPlayer === human) {
-                firstPlayer.playerBoard.printBoard(
-                    firstPlayer.playerBoard.opponentsBoard,
-                );
-                const guess = firstPlayer.playerBoard.promptAttack();
-                secondPlayer.playerBoard.receiveAttack(guess);
-                sunkFlag = secondPlayer.playerBoard.allSunk();
-            } else if (firstPlayer === computer) {
-                firstPlayer.playerBoard.printBoard(
-                    firstPlayer.playerBoard.opponentsBoard,
-                );
-                const guess = firstPlayer.playerBoard.promptAttackComputer();
-                secondPlayer.playerBoard.receiveAttack(guess);
-                sunkFlag = secondPlayer.playerBoard.allSunk();
+            if (result.result === "hit") {
+                const [col, row] = [
+                    result.coordinates[0],
+                    parseInt(result.coordinates.slice(1)),
+                ];
+                const colIndex =
+                    human.playerBoard.uppercaseLetters.indexOf(col);
+                human.playerBoard.opponentsBoard[row][colIndex] = "X";
+                console.log(`Hit at ${result.coordinates}!`);
+            } else if (result.result === "miss") {
+                const [col, row] = [
+                    result.coordinates[0],
+                    parseInt(result.coordinates.slice(1)),
+                ];
+                const colIndex =
+                    human.playerBoard.uppercaseLetters.indexOf(col);
+                human.playerBoard.opponentsBoard[row][colIndex] = "O";
+                console.log(`Miss at ${result.coordinates}.`);
+            } else {
+                console.log("Invalid or already guessed coordinate.");
+                continue;
             }
 
-            whosTurn = secondPlayer;
-        } else if (whosTurn === secondPlayer) {
-            if (secondPlayer === human) {
-                secondPlayer.playerBoard.printBoard(
-                    secondPlayer.playerBoard.opponentsBoard,
-                );
-                const guess = secondPlayer.playerBoard.promptAttack();
-                firstPlayer.playerBoard.receiveAttack(guess);
-                sunkFlag = firstPlayer.playerBoard.allSunk();
-            } else if (secondPlayer === computer) {
-                secondPlayer.playerBoard.printBoard(
-                    secondPlayer.playerBoard.opponentsBoard,
-                );
-                const guess = secondPlayer.playerBoard.promptAttackComputer();
-                firstPlayer.playerBoard.receiveAttack(guess);
-                sunkFlag = firstPlayer.playerBoard.allSunk();
+            if (computer.playerBoard.allSunk()) {
+                console.log("All enemy ships sunk! You win!");
+                gameOver = true;
+            }
+            whosTurn = computer;
+        } else {
+            // Computer's turn
+            const guess = computer.playerBoard.promptAttackComputer();
+            const result = human.playerBoard.receiveAttack(guess);
+
+            if (result.result === "hit") {
+                const [col, row] = [
+                    result.coordinates[0],
+                    parseInt(result.coordinates.slice(1)),
+                ];
+                const colIndex =
+                    computer.playerBoard.uppercaseLetters.indexOf(col);
+                computer.playerBoard.opponentsBoard[row][colIndex] = "X";
+                console.log(`Computer hit at ${result.coordinates}!`);
+            } else if (result.result === "miss") {
+                const [col, row] = [
+                    result.coordinates[0],
+                    parseInt(result.coordinates.slice(1)),
+                ];
+                const colIndex =
+                    computer.playerBoard.uppercaseLetters.indexOf(col);
+                computer.playerBoard.opponentsBoard[row][colIndex] = "O";
+                console.log(`Computer missed at ${result.coordinates}.`);
             }
 
-            whosTurn = firstPlayer;
+            if (human.playerBoard.allSunk()) {
+                console.log("All your ships are sunk! Computer wins!");
+                gameOver = true;
+            }
+            whosTurn = human;
         }
     }
-
-    gameEnd();
 }
 
 function gameEnd() {}
