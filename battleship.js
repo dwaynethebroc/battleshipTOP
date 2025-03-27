@@ -618,44 +618,6 @@ class Gameboard {
         return `${col}${row}`;
     }
 
-    // receiveAttack(coordinates) {
-    //     const matchStart = coordinates.match(/^([A-Z]+)(\d+)$/);
-
-    //     console.log(matchStart[1]);
-    //     console.log(matchStart[2]);
-
-    //     const colIndex = this.uppercaseLetters.indexOf(matchStart[1]); //Letter part(Columns)
-    //     const col = this.uppercaseLetters[colIndex]; // Letter part (Columns)
-    //     const row = Number(matchStart[2]); // Number part (Rows)
-
-    //     console.log(`${row}${col}`);
-
-    //     const hitFlag = this.occupiedCells.includes(coordinates);
-    //     const alreadyGuessed = this.playersGuesses.includes(coordinates);
-
-    //     if (alreadyGuessed) {
-    //         console.log(
-    //             "this coordinate has already been guessed please pick another option",
-    //         );
-    //         this.receiveAttack();
-    //     } else if (hitFlag && !alreadyGuessed) {
-    //         this.ships.forEach((ship) => {
-    //             if (ship.placement.includes(coordinates)) {
-    //                 this.playersGuesses.push(coordinates);
-    //                 const hit = ship.hit(coordinates);
-    //                 if (hit) {
-    //                     this.opponentsBoard[row][colIndex] = "X";
-    //                 }
-    //             }
-    //         });
-    //     } else {
-    //         this.playersGuesses.push(coordinates);
-    //         this.missedAttacks.push(coordinates);
-    //         this.opponentsBoard[row][colIndex] = "O";
-    //         console.log(`missed shot, board updated`);
-    //     }
-    // }
-
     receiveAttack(coordinates) {
         const matchStart = coordinates.match(/^([A-Z]+)(\d+)$/);
         if (!matchStart) {
@@ -715,24 +677,26 @@ class Player {
     }
 }
 
-function gameSetup() {
+function promptGameType() {
     let whichKindOfGame = null;
     while (whichKindOfGame !== "1" || whichKindOfGame !== "2") {
         whichKindOfGame = prompt(
             "What kind of game do you want to play? \n Press 1 or 2 and then hit enter: \n 1) Player vs Computer \n 2) Player vs Player",
-        );
+        ).trim();
     }
-    if (whichKindOfGame === "1") {
+    return whichKindOfGame;
+}
+function gameSetup(gameType) {
+    if (gameType === "1") {
         const human = new Player("human");
         const computer = new Player("computer");
-
-        human.gameSetup();
-        computer.gameSetup();
 
         gameTurnHumanVsComputer(human, computer);
     } else {
         const player1 = new Player("human");
         const player2 = new Player("human");
+
+        gameTurnPlayerVsPlayer(player1, player2);
     }
 }
 
@@ -831,4 +795,5 @@ function gameTurnHumanVsComputer(human, computer) {
     }
 }
 
-gameSetup();
+const gameType = promptGameType();
+gameSetup(gameType);
