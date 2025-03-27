@@ -677,47 +677,44 @@ class Player {
     }
 }
 
-function promptGameType() {
-    // let whichKindOfGame;
-    // const regex = /^[12]$/; // Only allows "1" or "2"
+function gameMode() {
+    let gameType;
 
-    // do {
-    //     whichKindOfGame = prompt(
-    //         "\n What kind of game do you want to play? \n Press 1 or 2 and then hit enter: \n 1) Player vs Computer \n 2) Player vs Player \n Enter here: ",
-    //     ).trim();
-    // } while (!regex.test(whichKindOfGame)); // Validate input
-
-    // return whichKindOfGame;
-
-    let gameType = prompt(
-        "\n What kind of game do you want to play? \n Press 1 or 2 and then hit enter: \n 1) Player vs Computer \n 2) Player vs Player \n Enter here: ",
-    ).trim();
-
-    while (gameType === "" || !gameType.match(/^[12]$/)) {
+    do {
         gameType = prompt(
-            "\n What kind of game do you want to play? \n Press 1 or 2 and then hit enter: \n 1) Player vs Computer \n 2) Player vs Player \n Enter here: ",
-        ).trim();
-    }
+            "\nWhat kind of game do you want to play?\nPress 1 or 2 and then hit enter:\n" +
+                "1) Player vs Computer\n" +
+                "2) Player vs Player\n" +
+                "Enter here:",
+        );
 
-    return gameType;
-}
-function gameMode(gameType) {
-    if (gameType === "1") {
-        const human = new Player("human");
-        const computer = new Player("computer");
+        if (gameType === null) return; // Handle cancel action
 
-        human.gameSetup();
-        computer.gameSetup();
+        gameType = gameType.trim();
 
-        gameTurnHumanVsComputer(human, computer);
-    } else if (gameType === "2") {
-        const player1 = new Player("human");
-        const player2 = new Player("human");
+        console.log(gameType);
+    } while (!gameType.match(/^[12]$/));
 
-        player1.gameSetup();
-        player2.gameSetup();
+    switch (gameType) {
+        case "1":
+            const human = new Player("human");
+            const computer = new Player("computer");
 
-        gameTurnPlayerVsPlayer(player1, player2);
+            human.gameSetup();
+            computer.gameSetup();
+
+            gameTurnHumanVsComputer(human, computer);
+            break;
+
+        case "2":
+            const player1 = new Player("human");
+            const player2 = new Player("human");
+
+            player1.gameSetup();
+            player2.gameSetup();
+
+            gameTurnPlayerVsPlayer(player1, player2);
+            break;
     }
 }
 
@@ -820,5 +817,4 @@ function gameTurnPlayerVsPlayer(player1, player2) {
     console.log("PVP game mode");
 }
 
-const gameType = promptGameType();
-gameMode(gameType);
+gameMode();
