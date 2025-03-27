@@ -160,8 +160,6 @@ class Gameboard {
                 match = shipPlacement.match(coordinateRegex);
             }
 
-            console.log(`Match? : ${match}`);
-
             let startingCoordinate = match[1] + match[2]; // e.g., "A2"
             let endCoordinate = match[3] + match[4]; // e.g., "A5"
 
@@ -227,9 +225,6 @@ class Gameboard {
                 );
             }
 
-            console.log("Starting coordinate: " + startingCoordinate);
-            console.log("Ending coordinate: " + endCoordinate);
-
             let orientation = this.orientation(
                 startingCoordinate,
                 endCoordinate,
@@ -279,8 +274,6 @@ class Gameboard {
             // Find column index
             const columnIndex = this.uppercaseLetters.indexOf(columnStart);
 
-            console.log("Column index:", columnIndex);
-
             // Change board cells for vertical placement
             for (let i = rowStart; i <= rowEnd; i++) {
                 board[i][columnIndex] = ship.type.slice(0, 1).toUpperCase();
@@ -293,8 +286,6 @@ class Gameboard {
             // Find column indexes
             const columnIndexStart = this.uppercaseLetters.indexOf(columnStart);
             const columnIndexEnd = this.uppercaseLetters.indexOf(columnEnd);
-
-            console.log("Column indexes:", columnIndexStart, columnIndexEnd);
 
             // Change board cells for horizontal placement
             for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
@@ -317,8 +308,6 @@ class Gameboard {
         const rowStart = Number(matchStart[2]); // Number part (Rows)
         const rowEnd = Number(matchEnd[2]);
 
-        console.log(columnStart, columnEnd, rowStart, rowEnd);
-
         // Find column indexes
         const columnIndexStart = this.uppercaseLetters.indexOf(columnStart);
         const columnIndexEnd = this.uppercaseLetters.indexOf(columnEnd);
@@ -326,35 +315,23 @@ class Gameboard {
         let boatLength = 0;
 
         if (columnStart === columnEnd) {
-            console.log("vertical");
-
             for (let i = rowStart; i <= rowEnd; i++) {
                 boatLength++;
             }
         } else if (rowStart === rowEnd) {
-            console.log("horizontal");
-
-            console.log("Column indexes:", columnIndexStart, columnIndexEnd);
-
             for (let i = columnIndexStart; i <= columnIndexEnd; i++) {
                 boatLength++;
             }
         } else if (rowEnd > rowStart && columnIndexEnd > columnIndexStart) {
-            console.log("diagonal");
-
             for (let i = rowStart; i <= rowEnd; i++) {
                 boatLength++;
             }
         }
 
-        console.log("boat length:", boatLength);
         return boatLength;
     }
 
     boatLengthEqualsShipType(boatLength, shipTypeLength) {
-        console.log(
-            `boat length: ${boatLength}, ship length: ${shipTypeLength}`,
-        );
         if (boatLength === shipTypeLength) {
             return true;
         } else {
@@ -507,7 +484,6 @@ class Gameboard {
 
         const verticalOrHorizontal = vertHorizontal[Math.round(Math.random())];
 
-        console.log(verticalOrHorizontal);
         return verticalOrHorizontal;
     }
 
@@ -532,9 +508,6 @@ class Gameboard {
                 const startCol =
                     this.uppercaseLetters[Math.floor(Math.random() * 10) + 1]; //Letters
 
-                console.log(startRow);
-                console.log(startCol);
-
                 orientationOfShip = this.verticalOrHorizontal();
 
                 let endRow = 0;
@@ -545,7 +518,6 @@ class Gameboard {
 
                     const endIndex = this.uppercaseLetters.indexOf(startCol);
                     const endAdjust = endIndex + ship.length - 1;
-                    console.log(endAdjust);
                     if (endAdjust < this.uppercaseLetters.length) {
                         endCol = this.uppercaseLetters[endAdjust]; //Letters
                     } else {
@@ -567,7 +539,6 @@ class Gameboard {
                 );
 
                 alreadyPlaced = this.alreadyPlaced(startCoords, endCoords);
-                console.log(startCoords + "-" + endCoords);
             }
 
             const placement = this.changeBoard(
@@ -692,11 +663,12 @@ function gameMode() {
 
         gameType = gameType.trim();
 
-        console.log(gameType);
+        console.log(`Game type: ${gameType}`);
     } while (!gameType.match(/^[12]$/));
 
     switch (gameType) {
         case "1":
+            console.log("You have chosen 'Vs Computer game mode'");
             const human = new Player("human");
             const computer = new Player("computer");
 
@@ -707,6 +679,7 @@ function gameMode() {
             break;
 
         case "2":
+            console.log("You have chosen 'PVP game mode'");
             const player1 = new Player("human");
             const player2 = new Player("human");
 
@@ -814,7 +787,104 @@ function gameTurnHumanVsComputer(human, computer) {
 }
 
 function gameTurnPlayerVsPlayer(player1, player2) {
-    console.log("PVP game mode");
+    let whosTurn = Math.random() < 0.5 ? player1 : player2;
+    let gameOver = false;
+
+    console.log(`${whosTurn} goes first`);
+
+    console.log(`${player1.playerBoard.ships}`);
+    console.log(`${player1.playerBOard.board}`);
+
+    console.log(`${player2.playerBoard.ships}`);
+    console.log(`${player2.playerBOard.board}`);
+
+    while (!gameOver) {
+        if (whosTurn === player1) {
+            // Player 1's turn
+            human.playerBoard.printBoard(human.playerBoard.opponentsBoard);
+            player2.playerBoard.printBoard(player2.playerBoard.opponentsBoard);
+            const guess = human.playerBoard.promptAttack();
+            const result = player2.playerBoard.receiveAttack(guess);
+
+            if (result.result === "hit") {
+                const [col, row] = [
+                    result.coordinates[0],
+                    parseInt(result.coordinates.slice(1)),
+                ];
+                const colIndex =
+                    human.playerBoard.uppercaseLetters.indexOf(col);
+                human.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    "red",
+                    "X",
+                );
+                console.log(`Hit at ${result.coordinates}!`);
+            } else if (result.result === "miss") {
+                const [col, row] = [
+                    result.coordinates[0],
+                    parseInt(result.coordinates.slice(1)),
+                ];
+                const colIndex =
+                    human.playerBoard.uppercaseLetters.indexOf(col);
+                human.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    "blue",
+                    "O",
+                );
+
+                console.log(`Miss at ${result.coordinates}.`);
+            } else {
+                console.log("Invalid or already guessed coordinate.");
+                continue;
+            }
+
+            if (player2.playerBoard.allSunk()) {
+                console.log("All enemy ships sunk! You win!");
+                gameOver = true;
+            }
+            whosTurn = player2;
+        } else if (whosTurn === player2) {
+            // Player 1's turn
+            player2.playerBoard.printBoard(player2.playerBoard.opponentsBoard);
+            player1.playerBoard.printBoard(player1.playerBoard.opponentsBoard);
+            const guess = player2.playerBoard.promptAttack();
+            const result = player1.playerBoard.receiveAttack(guess);
+
+            if (result.result === "hit") {
+                const [col, row] = [
+                    result.coordinates[0],
+                    parseInt(result.coordinates.slice(1)),
+                ];
+                const colIndex =
+                    player2.playerBoard.uppercaseLetters.indexOf(col);
+                player2.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    "red",
+                    "X",
+                );
+                console.log(`Hit at ${result.coordinates}!`);
+            } else if (result.result === "miss") {
+                const [col, row] = [
+                    result.coordinates[0],
+                    parseInt(result.coordinates.slice(1)),
+                ];
+                const colIndex =
+                    player2.playerBoard.uppercaseLetters.indexOf(col);
+                player2.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    "blue",
+                    "O",
+                );
+
+                console.log(`Miss at ${result.coordinates}.`);
+            } else {
+                console.log("Invalid or already guessed coordinate.");
+                continue;
+            }
+
+            if (player1.playerBoard.allSunk()) {
+                console.log("All enemy ships sunk! You win!");
+                gameOver = true;
+            }
+            whosTurn = player1;
+        }
+    }
 }
 
 gameMode();
