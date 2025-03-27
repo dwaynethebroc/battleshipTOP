@@ -792,18 +792,20 @@ function gameTurnPlayerVsPlayer(player1, player2) {
 
     console.log(`${whosTurn} goes first`);
 
+    console.log("Player 1's setup");
     console.log(`${player1.playerBoard.ships}`);
-    console.log(`${player1.playerBOard.board}`);
+    console.log(`${player1.playerBoard.board}`);
 
+    console.log("Player 2's setup");
     console.log(`${player2.playerBoard.ships}`);
-    console.log(`${player2.playerBOard.board}`);
+    console.log(`${player2.playerBoard.board}`);
 
     while (!gameOver) {
         if (whosTurn === player1) {
             // Player 1's turn
-            human.playerBoard.printBoard(human.playerBoard.opponentsBoard);
+            player1.playerBoard.printBoard(player1.playerBoard.opponentsBoard);
             player2.playerBoard.printBoard(player2.playerBoard.opponentsBoard);
-            const guess = human.playerBoard.promptAttack();
+            const guess = player1.playerBoard.promptAttack();
             const result = player2.playerBoard.receiveAttack(guess);
 
             if (result.result === "hit") {
@@ -812,8 +814,8 @@ function gameTurnPlayerVsPlayer(player1, player2) {
                     parseInt(result.coordinates.slice(1)),
                 ];
                 const colIndex =
-                    human.playerBoard.uppercaseLetters.indexOf(col);
-                human.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    player1.playerBoard.uppercaseLetters.indexOf(col);
+                player1.playerBoard.opponentsBoard[row][colIndex] = styleText(
                     "red",
                     "X",
                 );
@@ -824,8 +826,8 @@ function gameTurnPlayerVsPlayer(player1, player2) {
                     parseInt(result.coordinates.slice(1)),
                 ];
                 const colIndex =
-                    human.playerBoard.uppercaseLetters.indexOf(col);
-                human.playerBoard.opponentsBoard[row][colIndex] = styleText(
+                    player1.playerBoard.uppercaseLetters.indexOf(col);
+                player1.playerBoard.opponentsBoard[row][colIndex] = styleText(
                     "blue",
                     "O",
                 );
@@ -837,12 +839,12 @@ function gameTurnPlayerVsPlayer(player1, player2) {
             }
 
             if (player2.playerBoard.allSunk()) {
-                console.log("All enemy ships sunk! You win!");
+                console.log("All enemy ships sunk! Player 1 wins!");
                 gameOver = true;
             }
             whosTurn = player2;
         } else if (whosTurn === player2) {
-            // Player 1's turn
+            // Player 2's turn
             player2.playerBoard.printBoard(player2.playerBoard.opponentsBoard);
             player1.playerBoard.printBoard(player1.playerBoard.opponentsBoard);
             const guess = player2.playerBoard.promptAttack();
@@ -879,7 +881,7 @@ function gameTurnPlayerVsPlayer(player1, player2) {
             }
 
             if (player1.playerBoard.allSunk()) {
-                console.log("All enemy ships sunk! You win!");
+                console.log("All enemy ships sunk! Player2 wins!");
                 gameOver = true;
             }
             whosTurn = player1;
