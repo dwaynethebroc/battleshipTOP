@@ -678,23 +678,44 @@ class Player {
 }
 
 function promptGameType() {
-    let whichKindOfGame = null;
-    while (whichKindOfGame !== "1" || whichKindOfGame !== "2") {
-        whichKindOfGame = prompt(
-            "What kind of game do you want to play? \n Press 1 or 2 and then hit enter: \n 1) Player vs Computer \n 2) Player vs Player",
+    // let whichKindOfGame;
+    // const regex = /^[12]$/; // Only allows "1" or "2"
+
+    // do {
+    //     whichKindOfGame = prompt(
+    //         "\n What kind of game do you want to play? \n Press 1 or 2 and then hit enter: \n 1) Player vs Computer \n 2) Player vs Player \n Enter here: ",
+    //     ).trim();
+    // } while (!regex.test(whichKindOfGame)); // Validate input
+
+    // return whichKindOfGame;
+
+    let gameType = prompt(
+        "\n What kind of game do you want to play? \n Press 1 or 2 and then hit enter: \n 1) Player vs Computer \n 2) Player vs Player \n Enter here: ",
+    ).trim();
+
+    while (gameType === "" || !gameType.match(/^[12]$/)) {
+        gameType = prompt(
+            "\n What kind of game do you want to play? \n Press 1 or 2 and then hit enter: \n 1) Player vs Computer \n 2) Player vs Player \n Enter here: ",
         ).trim();
     }
-    return whichKindOfGame;
+
+    return gameType;
 }
-function gameSetup(gameType) {
+function gameMode(gameType) {
     if (gameType === "1") {
         const human = new Player("human");
         const computer = new Player("computer");
 
+        human.gameSetup();
+        computer.gameSetup();
+
         gameTurnHumanVsComputer(human, computer);
-    } else {
+    } else if (gameType === "2") {
         const player1 = new Player("human");
         const player2 = new Player("human");
+
+        player1.gameSetup();
+        player2.gameSetup();
 
         gameTurnPlayerVsPlayer(player1, player2);
     }
@@ -795,5 +816,9 @@ function gameTurnHumanVsComputer(human, computer) {
     }
 }
 
+function gameTurnPlayerVsPlayer(player1, player2) {
+    console.log("PVP game mode");
+}
+
 const gameType = promptGameType();
-gameSetup(gameType);
+gameMode(gameType);
