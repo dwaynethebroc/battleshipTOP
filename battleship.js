@@ -842,15 +842,7 @@ function gameTurnPlayerVsPlayer(player1, player2) {
     let whosTurn = Math.random() < 0.5 ? player1 : player2;
     let gameOver = false;
 
-    console.log(`${whosTurn} goes first`);
-
-    console.log("Player 1's setup");
-    console.log(`${player1.playerBoard.ships}`);
-    console.log(`${player1.playerBoard.board}`);
-
-    console.log("Player 2's setup");
-    console.log(`${player2.playerBoard.ships}`);
-    console.log(`${player2.playerBoard.board}`);
+    console.log(`${whosTurn.name} goes first`);
 
     while (!gameOver) {
         if (whosTurn === player1) {
@@ -891,7 +883,7 @@ function gameTurnPlayerVsPlayer(player1, player2) {
             }
 
             if (player2.playerBoard.allSunk()) {
-                console.log("All enemy ships sunk! Player 1 wins!");
+                console.log(`All enemy ships sunk! ${player1.name} wins!`);
                 gameOver = true;
             }
             whosTurn = player2;
@@ -933,7 +925,7 @@ function gameTurnPlayerVsPlayer(player1, player2) {
             }
 
             if (player1.playerBoard.allSunk()) {
-                console.log("All enemy ships sunk! Player2 wins!");
+                console.log(`All enemy ships sunk! ${player2.name} wins!`);
                 gameOver = true;
             }
             whosTurn = player1;
