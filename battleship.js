@@ -667,6 +667,17 @@ class Player {
     }
 }
 
+class DOM {
+    constructor() {}
+
+    setupDOM(board) {
+        for (let i = 0; i < 121; i++) {
+            // 11x11 = 121
+            const gridDiv = document.createElement("div");
+        }
+    }
+}
+
 function gameMode() {
     let gameType;
     let name;
@@ -793,6 +804,10 @@ function gameTurnHumanVsComputer(human, computer) {
 
             if (computer.playerBoard.allSunk()) {
                 console.log("All enemy ships sunk! You win!");
+                human.playerBoard.printBoard(human.playerBoard.opponentsBoard);
+                computer.playerBoard.printBoard(
+                    computer.playerBoard.opponentsBoard,
+                );
                 gameOver = true;
             }
             whosTurn = computer;
@@ -830,6 +845,10 @@ function gameTurnHumanVsComputer(human, computer) {
             }
 
             if (human.playerBoard.allSunk()) {
+                human.playerBoard.printBoard(human.playerBoard.opponentsBoard);
+                computer.playerBoard.printBoard(
+                    computer.playerBoard.opponentsBoard,
+                );
                 console.log("All your ships are sunk! Computer wins!");
                 gameOver = true;
             }
@@ -883,6 +902,12 @@ function gameTurnPlayerVsPlayer(player1, player2) {
             }
 
             if (player2.playerBoard.allSunk()) {
+                player1.playerBoard.printBoard(
+                    player1.playerBoard.opponentsBoard,
+                );
+                player2.playerBoard.printBoard(
+                    player2.playerBoard.opponentsBoard,
+                );
                 console.log(`All enemy ships sunk! ${player1.name} wins!`);
                 gameOver = true;
             }
@@ -926,6 +951,12 @@ function gameTurnPlayerVsPlayer(player1, player2) {
 
             if (player1.playerBoard.allSunk()) {
                 console.log(`All enemy ships sunk! ${player2.name} wins!`);
+                player1.playerBoard.printBoard(
+                    player2.playerBoard.opponentsBoard,
+                );
+                player2.playerBoard.printBoard(
+                    player1.playerBoard.opponentsBoard,
+                );
                 gameOver = true;
             }
             whosTurn = player1;
