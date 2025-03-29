@@ -71,6 +71,12 @@ class Gameboard {
         this.missedAttacks = [];
         this.opponentsGuesses = [];
 
+        //Computer only controls
+
+        this.temporaryHit = [];
+        this.educatedGuesses = [];
+
+        //references
         this.uppercaseLetters = [
             " ",
             "A",
@@ -596,11 +602,65 @@ class Gameboard {
         let alreadyGuessed = true;
         let row;
         let col;
-        while (alreadyGuessed) {
-            row = Math.floor(Math.random() * 10) + 1; //Numbers
-            col = this.uppercaseLetters[Math.floor(Math.random() * 10) + 1]; //Letters
 
-            alreadyGuessed = this.playersGuesses.includes(`${col}${row}`);
+        if (this.educatedGuesses.length > 0) {
+            //while the guess has already been made, use the first array index for coordinates, check if its been guessed, if not, return those coordinates, or remove coordinates from array and try next one
+            while (alreadyGuessed) {
+                row = this.educatedGuesses[0][0]; //number
+                col = this.uppercaseLetters[this.educatedGuesses[0][1]]; //letter
+
+                alreadyGuessed = this.playersGuesses.includes(`${col}${row}`);
+                this.educatedGuesses.shift();
+            }
+        } else if (
+            this.educatedGuesses.length === 0 &&
+            this.temporaryHit.length > 0
+        ) {
+            row = this.temporaryHit[0];
+            col = this.uppercaseLetters[this.temporaryHit[0][1]];
+            let tempCol = this.temporaryHit[1];
+
+            //create an array of guesses off all adjacent tiles if they are not out of bounds
+            const arrayOfAdjacentGridPositions = [
+                [1, 0],
+                [0, 1],
+                [-1, 0],
+                [0, -1],
+                [1, 1],
+                [-1, -1],
+                [-1, 1],
+                [1, -1],
+            ];
+
+            arrayOfAdjacentGridPositions.forEach((position) => {
+                const newRow = row + position[0];
+                const newColIndx = tempCol + position[1];
+                const newCol = this.uppercaseLetters[newColIndx];
+
+                //check if it is out of Bounds
+                if (
+                    newRow > 0 &&
+                    newRow <= 10 &&
+                    newColIndx > 0 &&
+                    newColIndx <= 10
+                ) {
+                    //check if it has already been guessed
+                    if (!this.playersGuesses.includes(`${newCol}${newRow}`)) {
+                        //push to saved guesses
+                        this.educatedGuesses.push([newRow, newColIndx]);
+                    }
+                }
+            });
+            //clear temporary hit class object
+            this.temporaryHit = [];
+        } else {
+            //if no educated guess make a random guess
+            while (alreadyGuessed) {
+                row = Math.floor(Math.random() * 10) + 1; //Numbers
+                col = this.uppercaseLetters[Math.floor(Math.random() * 10) + 1]; //Letters
+
+                alreadyGuessed = this.playersGuesses.includes(`${col}${row}`);
+            }
         }
 
         return `${col}${row}`;
@@ -823,11 +883,18 @@ function gameTurnHumanVsComputer(human, computer) {
                 ];
                 const colIndex =
                     computer.playerBoard.uppercaseLetters.indexOf(col);
-                // computer.playerBoard.opponentsBoard[row][colIndex] = "X";
                 computer.playerBoard.opponentsBoard[row][colIndex] = styleText(
                     "red",
                     "X",
                 );
+
+                //if there are no educated guesses to be made on next attack and there are no new initial guesses, queue up next educated guess coordinate
+                if (
+                    computer.playerBoard.educatedGuesses.length === 0 &&
+                    computer.playerBoard.temporaryHit.length === 0
+                ) {
+                    computer.playerBoard.temporaryHit = [row, colIndex];
+                }
                 console.log(`Computer hit at ${result.coordinates}!`);
             } else if (result.result === "miss") {
                 const [col, row] = [
@@ -836,7 +903,6 @@ function gameTurnHumanVsComputer(human, computer) {
                 ];
                 const colIndex =
                     computer.playerBoard.uppercaseLetters.indexOf(col);
-                // computer.playerBoard.opponentsBoard[row][colIndex] = "O";
                 computer.playerBoard.opponentsBoard[row][colIndex] = styleText(
                     "blue",
                     "O",
