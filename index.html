@@ -4,29 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Battleship</title>
-    <script src='battleship.js'></script>
-    <style src='style.css'></style>
+    <script src='battleship.js' defer></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class='header'>
         <h1>Battleship</h1>
     </div>
     <div class='gameBoards'>
-        <div class="board" id='player1'>
+        <div class="boardGroup" id='player1'>
+            <div class='board' id='player1Board'>
 
+            </div>
+            <div class="name">
+
+            </div>
         </div>
-        <div class='board'id="player2">
+        <div class='boardGroup'id="player2">
+            <div class='board' id='player2Board'>
 
+            </div>
+            <div class="name">
+                
+            </div>
         </div>
     </div>
     <div class="controls">
-
+        <button id='control1'>Example</button>
+        <button id='control2'>Example</button>
+        <button id='control3'>Example</button>
     </div>
     <div class="ships">
-
+        <div class='shipsBox' id='player1ships'></div>
+        <div class='shipsBox' id='player2ships'></div>
     </div>
     <div class="commandLine">
+        <div id="messages">
 
+        </div>
+        <div id="promptLine">
+
+        </div>
     </div>
     <div class="footer">
 

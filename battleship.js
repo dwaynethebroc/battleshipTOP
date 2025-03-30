@@ -1,8 +1,8 @@
 // export { Ship, Gameboard };
-import promptSync from "prompt-sync";
-import { styleText } from "node:util";
+// import promptSync from "prompt-sync";
+// import { styleText } from "node:util";
 
-const prompt = promptSync();
+// const prompt = promptSync();
 
 class Ship {
     constructor(length, placement, type, orientation) {
@@ -728,14 +728,147 @@ class Player {
 }
 
 class DOM {
+    // constructor(player1, player2) {
+    //     this.player1 = player1;
+    //     this.player2 = player2;
+    // }
+
     constructor() {}
 
-    setupDOM(board) {
-        for (let i = 0; i < 121; i++) {
-            // 11x11 = 121
-            const gridDiv = document.createElement("div");
-        }
+    setupDOM() {
+        this.setupBoards();
+        this.setupShips();
     }
+
+    setupBoards() {
+        //board 1
+        const board1 = document.getElementById("player1Board");
+
+        const container1 = document.createElement("div");
+        container1.classList.add("board");
+        const headers = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+
+        for (let row = 0; row < 11; row++) {
+            const gridRow = document.createElement("div");
+
+            for (let col = 0; col < 11; col++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+
+                if (row === 0 && col === 0) {
+                    cell.textContent = ""; // Top-left empty cell
+                } else if (row === 0) {
+                    cell.textContent = headers[col]; // Column headers
+                } else if (col === 0) {
+                    cell.textContent = row; // Row headers
+                } else {
+                    cell.textContent = "~"; // Grid content
+                }
+
+                gridRow.appendChild(cell);
+            }
+
+            board1.appendChild(gridRow);
+        }
+        board1.appendChild(container1);
+
+        //board2
+        const board2 = document.getElementById("player2Board");
+
+        const container2 = document.createElement("div");
+        container2.classList.add("board");
+
+        for (let row = 0; row < 11; row++) {
+            const gridRow = document.createElement("div");
+            for (let col = 0; col < 11; col++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+
+                if (row === 0 && col === 0) {
+                    cell.textContent = ""; // Top-left empty cell
+                } else if (row === 0) {
+                    cell.textContent = headers[col]; // Column headers
+                } else if (col === 0) {
+                    cell.textContent = row; // Row headers
+                } else {
+                    cell.textContent = "~"; // Grid content
+                }
+
+                gridRow.appendChild(cell);
+            }
+            container2.appendChild(gridRow);
+        }
+        board2.appendChild(container2);
+    }
+
+    setupShips() {
+        //ships
+        const shipTypes = [
+            { length: 2, type: "patrol" },
+            { length: 3, type: "submarine" },
+            { length: 3, type: "destroyer" },
+            { length: 4, type: "battleship" },
+            { length: 5, type: "carrier" },
+        ];
+        const shipBox1 = document.getElementById("player1ships");
+        const shipBox2 = document.getElementById("player2ships");
+
+        //shipBox 1
+        shipTypes.forEach((ship) => {
+            const container = document.createElement("div");
+            const healthContainer = document.createElement("div");
+            healthContainer.classList.add("health");
+            container.classList.add("ship");
+            container.id = ship.type;
+
+            for (let i = 0; i < ship.length; i++) {
+                const div = document.createElement("div");
+                if ((i = 0)) {
+                    div.textContent = `${ship.type}:`;
+                    container.appendChild(div);
+                } else {
+                    div.textContent = "";
+                    div.classList.add("health");
+                    div.id = "healthBox";
+
+                    healthContainer.appendChild(div);
+                }
+            }
+            container.appendChild(healthContainer);
+            shipBox1.appendChild(container);
+        });
+
+        //shipBox2
+        shipTypes.forEach((ship) => {
+            const container = document.createElement("div");
+            const healthContainer = document.createElement("div");
+            healthContainer.classList.add("health");
+            container.classList.add("ship");
+            container.id = ship.type;
+
+            for (let i = 0; i < ship.length; i++) {
+                const div = document.createElement("div");
+                if ((i = 0)) {
+                    div.textContent = `${ship.type}:`;
+                    container.appendChild(div);
+                } else {
+                    div.textContent = "";
+                    div.classList.add("health");
+                    div.id = "healthBox";
+
+                    healthContainer.appendChild(div);
+                }
+            }
+            container.appendChild(healthContainer);
+            shipBox2.appendChild(container);
+        });
+    }
+
+    gameTimeDOM() {}
+
+    updateBoard() {}
+
+    resetDOM() {}
 }
 
 function gameMode() {
@@ -1030,4 +1163,6 @@ function gameTurnPlayerVsPlayer(player1, player2) {
     }
 }
 
-gameMode();
+const display = new DOM();
+display.setupDOM();
+// gameMode();

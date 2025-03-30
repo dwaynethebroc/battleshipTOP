@@ -1,0 +1,39 @@
+div {
+    border: 2px solid black
+}
+
+button {
+    font-size: 10px;
+    width: 50px;
+    height: 25px;
+    text-align: center;
+}
+
+.header{
+    text-align: center;
+}
+
+.board {
+    display: flex;
+    flex-direction: row;
+} 
+
+.cell{
+    width: 25px;
+    height: 25px;
+
+    text-align: center;
+    vertical-align: center;
+}
+
+.gameBoards {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+}
