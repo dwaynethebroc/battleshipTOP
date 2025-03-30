@@ -1,5 +1,5 @@
 div {
-    border: 2px solid black
+    border: 2px solid grey
 }
 
 button {
@@ -32,8 +32,34 @@ button {
     padding: 20px;
 }
 
+.boardGroup {
+    display: flex;
+}
+
 .controls {
     display: flex;
     justify-content: center;
     gap: 25px;
+}
+
+.ships{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.shipsBox{
+    display: flex;
+    flex-direction: column;
+}
+
+.health{
+    display: flex;
+    flex-direction: row;
+}
+
+.healthBox {
+    background-color: green;
+    height: 20px;
+    width: 50px;
 }

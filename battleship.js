@@ -728,12 +728,9 @@ class Player {
 }
 
 class DOM {
-    // constructor(player1, player2) {
-    //     this.player1 = player1;
-    //     this.player2 = player2;
-    // }
-
-    constructor() {}
+    constructor() {
+        this.facts = [];
+    }
 
     setupDOM() {
         this.setupBoards();
@@ -768,7 +765,7 @@ class DOM {
                 gridRow.appendChild(cell);
             }
 
-            board1.appendChild(gridRow);
+            container1.appendChild(gridRow);
         }
         board1.appendChild(container1);
 
@@ -804,11 +801,11 @@ class DOM {
     setupShips() {
         //ships
         const shipTypes = [
-            { length: 2, type: "patrol" },
-            { length: 3, type: "submarine" },
-            { length: 3, type: "destroyer" },
-            { length: 4, type: "battleship" },
-            { length: 5, type: "carrier" },
+            { length: 2, type: "Patrol" },
+            { length: 3, type: "Submarine" },
+            { length: 3, type: "Destroyer" },
+            { length: 4, type: "Battleship" },
+            { length: 5, type: "Carrier" },
         ];
         const shipBox1 = document.getElementById("player1ships");
         const shipBox2 = document.getElementById("player2ships");
@@ -821,16 +818,15 @@ class DOM {
             container.classList.add("ship");
             container.id = ship.type;
 
-            for (let i = 0; i < ship.length; i++) {
-                const div = document.createElement("div");
-                if ((i = 0)) {
+            for (let i = 0; i <= ship.length; i++) {
+                if (i === 0) {
+                    const div = document.createElement("div");
                     div.textContent = `${ship.type}:`;
                     container.appendChild(div);
                 } else {
+                    const div = document.createElement("div");
                     div.textContent = "";
-                    div.classList.add("health");
-                    div.id = "healthBox";
-
+                    div.classList.add("healthBox");
                     healthContainer.appendChild(div);
                 }
             }
@@ -846,16 +842,15 @@ class DOM {
             container.classList.add("ship");
             container.id = ship.type;
 
-            for (let i = 0; i < ship.length; i++) {
-                const div = document.createElement("div");
-                if ((i = 0)) {
+            for (let i = 0; i <= ship.length; i++) {
+                if (i === 0) {
+                    const div = document.createElement("div");
                     div.textContent = `${ship.type}:`;
                     container.appendChild(div);
                 } else {
+                    const div = document.createElement("div");
                     div.textContent = "";
-                    div.classList.add("health");
-                    div.id = "healthBox";
-
+                    div.classList.add("healthBox");
                     healthContainer.appendChild(div);
                 }
             }
@@ -864,11 +859,11 @@ class DOM {
         });
     }
 
-    gameTimeDOM() {}
+    // gameTimeDOM() {}
 
-    updateBoard() {}
+    // updateBoard() {}
 
-    resetDOM() {}
+    // resetDOM() {}
 }
 
 function gameMode() {
