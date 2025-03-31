@@ -733,6 +733,12 @@ class DOM {
     }
 
     setupDOM() {
+        const form = document.querySelector("form");
+        form.addEventListener("submit", (event) => {
+            event.preventDefault(); // Prevent form refresh
+            this.getInput();
+        });
+
         this.setupBoards();
         this.setupShips();
         this.setupCommandLine();
@@ -871,9 +877,13 @@ class DOM {
         const text = document.getElementById("answer");
         const input = text.value;
 
-        text.textContent = "";
+        text.value = "";
 
-        this.printMessage(input);
+        if (input === "") {
+            return;
+        } else {
+            this.printMessage(input);
+        }
 
         return input;
     };
