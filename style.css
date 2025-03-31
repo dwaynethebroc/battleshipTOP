@@ -1,65 +1,131 @@
 div {
-    border: 2px solid grey
+    border: 1px dotted grey
 }
 
 button {
     font-size: 10px;
-    width: 50px;
-    height: 25px;
     text-align: center;
+}
+
+form {
+    display: flex;
 }
 
 .header{
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    font-size: 20px;
 }
 
-.board {
+.boardGroup {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+}
+
+.board1 {
     display: flex;
     flex-direction: row;
+    justify-content: left;
+    width: 100%;
+} 
+
+.board2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    width: 100%;
 } 
 
 .cell{
-    width: 25px;
+    display: flex;
     height: 25px;
-
-    text-align: center;
-    vertical-align: center;
+    width: 30px;
+    border: 2px black solid;
+    justify-content: center;
+    align-items: center;
 }
 
 .gameBoards {
     display: flex;
     justify-content: space-around;
-    padding: 20px;
-}
-
-.boardGroup {
-    display: flex;
+    flex-wrap: 1;
+    padding: 10px;
 }
 
 .controls {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    gap: 25px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    width: 33%;
+}
+
+.commandLine{
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    width: 33%;
+}
+
+.messages{
+    display: flex;
 }
 
 .ships{
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    padding: 10px;
+}
+
+.shipName{
+    display: flex;
+    justify-content: center;
 }
 
 .shipsBox{
     display: flex;
     flex-direction: column;
+    width: 33%;
 }
 
 .health{
     display: flex;
     flex-direction: row;
+    gap: 2px;
+    padding: 2px;
 }
 
 .healthBox {
     background-color: green;
     height: 20px;
     width: 50px;
+}
+
+#promptLine{
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+}
+
+#messages {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    height: 25%;
+}
+
+input#answer{
+    width: 100%;
+    height: 1rem;
 }

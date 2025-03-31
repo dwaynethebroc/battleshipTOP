@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class='header'>
-        <h1>Battleship</h1>
+        <p>Battleship</p>
     </div>
     <div class='gameBoards'>
         <div class="boardGroup" id='player1'>
@@ -20,6 +20,10 @@
 
             </div>
         </div>
+        <div class="controls">
+            <button id='control1'>Example</button>
+            <button id='control2'>Example</button>
+        </div>
         <div class='boardGroup'id="player2">
             <div class='board' id='player2Board'>
 
@@ -28,24 +32,25 @@
                 
             </div>
         </div>
+        
     </div>
-    <div class="controls">
-        <button id='control1'>Example</button>
-        <button id='control2'>Example</button>
-        <button id='control3'>Example</button>
-    </div>
+    
+    
     <div class="ships">
         <div class='shipsBox' id='player1ships'></div>
+        <div class="commandLine">
+            <div id="messages">
+                
+            </div>
+            <label for="answer">Enter messages here:</label>
+            <div id="promptLine">
+                    <input type="text" id="answer" name="lname"><br><br>
+                    <input type="submit" id='submit' value="Submit">
+            </div>
+        </div>
         <div class='shipsBox' id='player2ships'></div>
     </div>
-    <div class="commandLine">
-        <div id="messages">
-
-        </div>
-        <div id="promptLine">
-
-        </div>
-    </div>
+    
     <div class="footer">
 
     </div>

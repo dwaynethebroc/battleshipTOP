@@ -729,12 +729,13 @@ class Player {
 
 class DOM {
     constructor() {
-        this.facts = [];
+        this.messages = [];
     }
 
     setupDOM() {
         this.setupBoards();
         this.setupShips();
+        this.setupCommandLine();
     }
 
     setupBoards() {
@@ -742,7 +743,7 @@ class DOM {
         const board1 = document.getElementById("player1Board");
 
         const container1 = document.createElement("div");
-        container1.classList.add("board");
+        container1.classList.add("board1");
         const headers = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
         for (let row = 0; row < 11; row++) {
@@ -773,7 +774,7 @@ class DOM {
         const board2 = document.getElementById("player2Board");
 
         const container2 = document.createElement("div");
-        container2.classList.add("board");
+        container2.classList.add("board2");
 
         for (let row = 0; row < 11; row++) {
             const gridRow = document.createElement("div");
@@ -822,6 +823,7 @@ class DOM {
                 if (i === 0) {
                     const div = document.createElement("div");
                     div.textContent = `${ship.type}:`;
+                    div.classList.add("shipName");
                     container.appendChild(div);
                 } else {
                     const div = document.createElement("div");
@@ -846,6 +848,7 @@ class DOM {
                 if (i === 0) {
                     const div = document.createElement("div");
                     div.textContent = `${ship.type}:`;
+                    div.classList.add("shipName");
                     container.appendChild(div);
                 } else {
                     const div = document.createElement("div");
@@ -859,11 +862,51 @@ class DOM {
         });
     }
 
+    setupCommandLine() {
+        const submitButton = document.getElementById("submit");
+        submitButton.addEventListener("click", this.getInput);
+    }
+
+    getInput = () => {
+        const text = document.getElementById("answer");
+        const input = text.value;
+
+        text.textContent = "";
+
+        this.printMessage(input);
+
+        return input;
+    };
+
+    printMessage(input) {
+        const messageBox = document.getElementById("messages");
+        messageBox.textContent = "";
+
+        while (this.messages.length > 3) {
+            this.messages.shift();
+        }
+
+        this.messages.push(input);
+
+        this.messages.forEach((message) => {
+            const div = document.createElement("div");
+            div.classList.add("message");
+            div.textContent = `${message}`;
+
+            messageBox.appendChild(div);
+        });
+    }
+
     // gameTimeDOM() {}
 
     // updateBoard() {}
 
     // resetDOM() {}
+}
+
+function masterGame() {
+    const display = new DOM();
+    display.setupDOM();
 }
 
 function gameMode() {
@@ -1158,6 +1201,5 @@ function gameTurnPlayerVsPlayer(player1, player2) {
     }
 }
 
-const display = new DOM();
-display.setupDOM();
+masterGame();
 // gameMode();
