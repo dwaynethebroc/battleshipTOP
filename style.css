@@ -124,7 +124,7 @@ form {
 }
 
 .message {
-    height: 25%;
+    display: flex;
     border: 2px solid black;
     padding: 5px;
 
@@ -151,7 +151,7 @@ input#answer{
 button#control1{
     height: 25px;
     width: 100px;
-    
+
     padding: 2px;
 }
 

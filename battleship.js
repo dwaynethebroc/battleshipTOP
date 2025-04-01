@@ -772,7 +772,9 @@ class DOM {
                 } else {
                     cell.textContent = "~"; // Grid content
                     cell.id = `${headers[row]}${col}`;
-                    cell.addEventListener("click", this.receiveInput(cell));
+                    cell.addEventListener("click", () =>
+                        this.receiveInput(cell),
+                    );
                 }
 
                 gridRow.appendChild(cell);
@@ -886,7 +888,11 @@ class DOM {
 
         button1.textContent = "Human vs Computer";
         button2.textContent = "Player vs Player";
+
+        button1.addEventListener("click", () => this.humanVsComputerDOM);
+        button2.addEventListener("click", () => this.playerVsPlayerDOM);
     }
+
     getInput = () => {
         const text = document.getElementById("answer");
         const input = text.value;
@@ -924,6 +930,14 @@ class DOM {
     receiveInput(div) {
         this.lastPressedCell = div.id;
         console.log(this.lastPressedCell);
+    }
+
+    humanVsComputerDOM() {
+        this.printMessage("Human vs Computer mode selected");
+    }
+
+    playerVsPlayerDOM() {
+        this.printMessage("Player vs Player mode selected");
     }
 
     gameModeDOM() {}
