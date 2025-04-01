@@ -730,6 +730,7 @@ class Player {
 class DOM {
     constructor() {
         this.messages = [];
+        this.lastPressedCell = "";
     }
 
     setupDOM() {
@@ -742,6 +743,10 @@ class DOM {
         this.setupBoards();
         this.setupShips();
         this.setupCommandLine();
+        this.setupButtons();
+
+        let message = `Welcome to Battleship. Is this a 1 player or 2 player game admiral? Press the corresponding button above`;
+        this.printMessage(message);
     }
 
     setupBoards() {
@@ -754,7 +759,6 @@ class DOM {
 
         for (let row = 0; row < 11; row++) {
             const gridRow = document.createElement("div");
-
             for (let col = 0; col < 11; col++) {
                 const cell = document.createElement("div");
                 cell.classList.add("cell");
@@ -762,16 +766,17 @@ class DOM {
                 if (row === 0 && col === 0) {
                     cell.textContent = ""; // Top-left empty cell
                 } else if (row === 0) {
-                    cell.textContent = headers[col]; // Column headers
+                    cell.textContent = col; // Column headers
                 } else if (col === 0) {
-                    cell.textContent = row; // Row headers
+                    cell.textContent = headers[row]; // Row headers
                 } else {
                     cell.textContent = "~"; // Grid content
+                    cell.id = `${headers[row]}${col}`;
+                    cell.addEventListener("click", this.receiveInput(cell));
                 }
 
                 gridRow.appendChild(cell);
             }
-
             container1.appendChild(gridRow);
         }
         board1.appendChild(container1);
@@ -791,11 +796,13 @@ class DOM {
                 if (row === 0 && col === 0) {
                     cell.textContent = ""; // Top-left empty cell
                 } else if (row === 0) {
-                    cell.textContent = headers[col]; // Column headers
+                    cell.textContent = col; // Column headers
                 } else if (col === 0) {
-                    cell.textContent = row; // Row headers
+                    cell.textContent = headers[row]; // Row headers
                 } else {
                     cell.textContent = "~"; // Grid content
+                    cell.id = `${headers[row]}${col}`;
+                    cell.addEventListener("click", this.receiveInput(cell));
                 }
 
                 gridRow.appendChild(cell);
@@ -873,6 +880,13 @@ class DOM {
         submitButton.addEventListener("click", this.getInput);
     }
 
+    setupButtons() {
+        const button1 = document.getElementById("control1");
+        const button2 = document.getElementById("control2");
+
+        button1.textContent = "Human vs Computer";
+        button2.textContent = "Player vs Player";
+    }
     getInput = () => {
         const text = document.getElementById("answer");
         const input = text.value;
@@ -907,6 +921,13 @@ class DOM {
         });
     }
 
+    receiveInput(div) {
+        this.lastPressedCell = div.id;
+        console.log(this.lastPressedCell);
+    }
+
+    gameModeDOM() {}
+
     // gameTimeDOM() {}
 
     // updateBoard() {}
@@ -919,7 +940,7 @@ function masterGame() {
     display.setupDOM();
 }
 
-function gameMode() {
+function gameModeTerminal() {
     let gameType;
     let name;
     let name1;
@@ -927,7 +948,7 @@ function gameMode() {
 
     do {
         gameType = prompt(
-            "\nWhat kind of game do you want to play?\nPress 1 or 2 and then hit enter:\n" +
+            "\nWhat kind of game do you want to play?\nPress 2 or 2 and then hit enter:\n" +
                 "1) Player vs Computer\n" +
                 "2) Player vs Player\n" +
                 "Enter here:",
@@ -959,7 +980,7 @@ function gameMode() {
             human.gameSetup();
             computer.gameSetup();
 
-            gameTurnHumanVsComputer(human, computer);
+            gameTurnHumanVsComputerTerminal(human, computer);
             break;
 
         case "2":
@@ -990,12 +1011,12 @@ function gameMode() {
             player1.gameSetup();
             player2.gameSetup();
 
-            gameTurnPlayerVsPlayer(player1, player2);
+            gameTurnPlayerVsPlayerTerminal(player1, player2);
             break;
     }
 }
 
-function gameTurnHumanVsComputer(human, computer) {
+function gameTurnHumanVsComputerTerminal(human, computer) {
     let whosTurn = Math.random() < 0.5 ? human : computer;
     let gameOver = false;
 
@@ -1104,7 +1125,7 @@ function gameTurnHumanVsComputer(human, computer) {
     }
 }
 
-function gameTurnPlayerVsPlayer(player1, player2) {
+function gameTurnPlayerVsPlayerTerminal(player1, player2) {
     let whosTurn = Math.random() < 0.5 ? player1 : player2;
     let gameOver = false;
 
