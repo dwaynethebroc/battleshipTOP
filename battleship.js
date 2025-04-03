@@ -574,7 +574,6 @@ class Gameboard {
             this.ships.push(
                 new Ship(ship.length, placement, ship.type, orientationOfShip),
             );
-            // this.printBoard(this.board);
         });
     }
 
@@ -729,6 +728,9 @@ class Player {
 
 class DOM {
     constructor() {
+        this.player1 = null;
+        this.player2 = null;
+
         this.messages = [];
         this.lastPressedCell = "";
         this.gameMode = "";
@@ -961,56 +963,187 @@ class DOM {
         this.lastPressedCell = div.id;
         console.log(this.lastPressedCell);
     }
+
+    placeShipsDOM() {
+        const shipTypes = [
+            { length: 2, type: "patrol" },
+            { length: 3, type: "submarine" },
+            { length: 3, type: "destroyer" },
+            { length: 4, type: "battleship" },
+            { length: 5, type: "carrier" },
+        ];
+
+        const coordinateRegex = /^([A-Z]+)(\d+)-([A-Z]+)(\d+)$/; // Matches format "A2-A5"
+
+        shipTypes.forEach((ship) => {
+            let shipPlacement = this.promptShipDOM(ship);
+            let match = shipPlacement.match(coordinateRegex);
+
+            while (!match || shipPlacement === "") {
+                this.printBoard(this.board);
+                shipPlacement = this.promptShip(ship);
+                match = shipPlacement.match(coordinateRegex);
+            }
+
+            let startingCoordinate = match[1] + match[2]; // e.g., "A2"
+            let endCoordinate = match[3] + match[4]; // e.g., "A5"
+
+            let boatLength = this.lengthOfBoat(
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            let lengthsMatch = this.boatLengthEqualsShipType(
+                boatLength,
+                ship.length,
+            );
+
+            let outOfBounds = this.outOfBounds(
+                boatLength,
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            let alreadyPlaced = this.alreadyPlaced(
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            while (!lengthsMatch || outOfBounds || alreadyPlaced) {
+                this.printBoard(this.board);
+
+                this.errorMessage(
+                    match,
+                    lengthsMatch,
+                    boatLength,
+                    ship.length,
+                    outOfBounds,
+                    alreadyPlaced,
+                );
+
+                shipPlacement = this.promptShip(ship);
+
+                match = shipPlacement.match(coordinateRegex);
+
+                startingCoordinate = match[1] + match[2]; // e.g., "A2"
+                endCoordinate = match[3] + match[4]; // e.g., "A5"
+
+                boatLength = this.lengthOfBoat(
+                    startingCoordinate,
+                    endCoordinate,
+                );
+
+                lengthsMatch = this.boatLengthEqualsShipType(
+                    boatLength,
+                    ship.length,
+                );
+
+                outOfBounds = this.outOfBounds(
+                    boatLength,
+                    startingCoordinate,
+                    endCoordinate,
+                );
+
+                alreadyPlaced = this.alreadyPlaced(
+                    startingCoordinate,
+                    endCoordinate,
+                );
+            }
+
+            let orientation = this.orientation(
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            const placement = this.changeBoard(
+                startingCoordinate,
+                endCoordinate,
+                this.board,
+                ship,
+            );
+
+            this.ships.push(
+                new Ship(boatLength, placement, ship.type, orientation),
+            );
+            this.printBoard(this.board);
+        });
+    }
+
+    promptShipDOM(ship) {
+        this.printMessage(
+            `Ship to be placed ${ship} of ship length ${ship.length}`,
+        );
+    }
     //gameModeDOM() {}
 
     // updateBoard() {}
 
     // resetDOM() {}
-}
 
-async function gameModeDOM() {
-    const display = new DOM();
-    display.setupDOM();
-    const selectedGameMode = await display.gameModeDOM();
+    async gameModeDOM() {
+        this.setupDOM();
+        const selectedGameMode = await display.gameModeDOM();
 
-    let playerName;
-    let playerName2;
+        let playerName;
+        let playerName2;
 
-    const nameDiv1 = document.getElementById("player1name");
-    const nameDiv2 = document.getElementById("player2name");
+        const nameDiv1 = document.getElementById("player1name");
+        const nameDiv2 = document.getElementById("player2name");
 
-    if (selectedGameMode === "vsComputer") {
-        display.printMessage("What is your name admiral?");
-        playerName = await display.getInput();
+        if (selectedGameMode === "vsComputer") {
+            this.printMessage("What is your name admiral?");
+            playerName = await display.getInput();
 
-        nameDiv1.textContent = playerName;
-        nameDiv2.textContent = "Computer";
+            nameDiv1.textContent = playerName;
+            nameDiv2.textContent = "Computer";
 
-        const human = new Player("human", playerName, "vsComputer");
-        const computer = new Player("computer", "computer", "vsComputer");
+            this.player1 = new Player("human", playerName, "vsComputer");
+            this.player2 = new Player("computer", "computer", "vsComputer");
 
-        gameTurnVsComputerDOM(human, computer);
-    } else if (selectedGameMode === "PVP") {
-        display.printMessage("What is player 1's name admiral?");
-        playerName = await display.getInput();
+            this.player2.playerBoard.SetupComputer();
+            this.humanSetup(player1);
 
-        nameDiv1.textContent = playerName;
+            this.gameTurnVsComputerDOM(this.player1, this.player2);
+        } else if (selectedGameMode === "PVP") {
+            display.printMessage("What is player 1's name admiral?");
+            playerName = await display.getInput();
 
-        display.printMessage("What is player 2's name admiral?");
-        playerName2 = await display.getInput();
+            nameDiv1.textContent = playerName;
 
-        nameDiv2.textContent = playerName2;
+            display.printMessage("What is player 2's name admiral?");
+            playerName2 = await display.getInput();
 
-        const player1 = new Player("human", playerName, "PVP");
-        const player2 = new Player("human", playerName2, "PVP");
+            nameDiv2.textContent = playerName2;
 
-        gameTurnPVPDOM(player1, player2);
+            this.player1 = new Player("human", playerName, "PVP");
+            this.player2 = new Player("human", playerName2, "PVP");
+
+            this.humanSetup(player1);
+            this.humanSetup(player2);
+
+            this.gameTurnPVPDOM(this.player1, this.player2);
+        }
     }
+
+    async humanSetup(player) {
+        this.printMessage("");
+    }
+
+    // computerSetup() {
+
+    // }
+
+    async gameTurnVsComputerDOM(human, computer) {
+        const messages = document.getElementById("messages");
+        messages.textContent = "";
+
+        display.printMessage("Please select the coordinates for your ship");
+
+        human.boardSetupHuman();
+    }
+
+    gameTurnPVPDOM(player1, player2) {}
 }
-
-function gameTurnVsComputerDOM(human, computer) {}
-
-function gameTurnPVPDOM(player1, player2) {}
 
 function gameModeTerminal() {
     let gameType;
@@ -1304,7 +1437,8 @@ function gameTurnPlayerVsPlayerTerminal(player1, player2) {
     }
 }
 
-gameModeDOM();
+const display = new DOM();
+display.gameModeDOM();
 
 //for terminal game play
 // gameModeTerminal();
