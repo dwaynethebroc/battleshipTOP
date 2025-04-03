@@ -731,6 +731,7 @@ class DOM {
     constructor() {
         this.messages = [];
         this.lastPressedCell = "";
+        this.gameMode = "";
     }
 
     setupDOM() {
@@ -743,10 +744,10 @@ class DOM {
         this.setupBoards();
         this.setupShips();
         this.setupCommandLine();
-        this.setupButtons();
 
-        let message = `Welcome to Battleship. Is this a 1 player or 2 player game admiral? Press the corresponding button above`;
-        this.printMessage(message);
+        this.printMessage(
+            `Welcome to Battleship. Is this a 1 player or 2 player game admiral? Press the corresponding button above`,
+        );
     }
 
     setupBoards() {
@@ -881,33 +882,60 @@ class DOM {
 
     setupCommandLine() {
         const submitButton = document.getElementById("submit");
-        submitButton.addEventListener("click", this.getInput);
+        submitButton.addEventListener("click", () => this.getInput);
     }
 
-    setupButtons() {
-        const button1 = document.getElementById("control1");
-        const button2 = document.getElementById("control2");
+    async gameModeDOM() {
+        return new Promise((resolve) => {
+            const button1 = document.getElementById("control1");
+            const button2 = document.getElementById("control2");
+            const controls = document.getElementById("controls");
 
-        button1.textContent = "Human vs Computer";
-        button2.textContent = "Player vs Player";
+            button1.textContent = "Human vs Computer";
+            button2.textContent = "Player vs Player";
 
-        button1.addEventListener("click", () => this.humanVsComputerDOM);
-        button2.addEventListener("click", () => this.playerVsPlayerDOM);
+            button1.addEventListener(
+                "click",
+                () => {
+                    this.gameMode = "vsComputer";
+                    this.printMessage("Human vs Computer mode selected");
+                    controls.textContent = "";
+                    resolve(this.gameMode);
+                },
+                { once: true },
+            );
+
+            button2.addEventListener(
+                "click",
+                () => {
+                    this.gameMode = "PVP";
+                    this.printMessage("Player vs Player mode selected");
+                    controls.textContent = "";
+                    resolve(this.gameMode);
+                },
+                { once: true },
+            );
+        });
     }
 
     getInput = () => {
-        const text = document.getElementById("answer");
-        const input = text.value;
+        return new Promise((resolve) => {
+            const text = document.getElementById("answer");
+            const submitButton = document.getElementById("submit");
 
-        text.value = "";
+            // Listen for the form submission
+            const handleSubmit = () => {
+                const input = text.value.trim();
+                if (input !== "") {
+                    text.value = "";
+                    this.printMessage(input);
+                    submitButton.removeEventListener("click", handleSubmit);
+                    resolve(input); // Resolve the promise with user input
+                }
+            };
 
-        if (input === "") {
-            return;
-        } else {
-            this.printMessage(input);
-        }
-
-        return input;
+            submitButton.addEventListener("click", handleSubmit);
+        });
     };
 
     printMessage(input) {
@@ -933,28 +961,56 @@ class DOM {
         this.lastPressedCell = div.id;
         console.log(this.lastPressedCell);
     }
-
-    humanVsComputerDOM() {
-        this.printMessage("Human vs Computer mode selected");
-    }
-
-    playerVsPlayerDOM() {
-        this.printMessage("Player vs Player mode selected");
-    }
-
-    gameModeDOM() {}
-
-    // gameTimeDOM() {}
+    //gameModeDOM() {}
 
     // updateBoard() {}
 
     // resetDOM() {}
 }
 
-function masterGame() {
+async function gameModeDOM() {
     const display = new DOM();
     display.setupDOM();
+    const selectedGameMode = await display.gameModeDOM();
+
+    let playerName;
+    let playerName2;
+
+    const nameDiv1 = document.getElementById("player1name");
+    const nameDiv2 = document.getElementById("player2name");
+
+    if (selectedGameMode === "vsComputer") {
+        display.printMessage("What is your name admiral?");
+        playerName = await display.getInput();
+
+        nameDiv1.textContent = playerName;
+        nameDiv2.textContent = "Computer";
+
+        const human = new Player("human", playerName, "vsComputer");
+        const computer = new Player("computer", "computer", "vsComputer");
+
+        gameTurnVsComputerDOM(human, computer);
+    } else if (selectedGameMode === "PVP") {
+        display.printMessage("What is player 1's name admiral?");
+        playerName = await display.getInput();
+
+        nameDiv1.textContent = playerName;
+
+        display.printMessage("What is player 2's name admiral?");
+        playerName2 = await display.getInput();
+
+        nameDiv2.textContent = playerName2;
+
+        const player1 = new Player("human", playerName, "PVP");
+        const player2 = new Player("human", playerName2, "PVP");
+
+        gameTurnPVPDOM(player1, player2);
+    }
 }
+
+function gameTurnVsComputerDOM(human, computer) {}
+
+function gameTurnPVPDOM(player1, player2) {}
 
 function gameModeTerminal() {
     let gameType;
@@ -1248,5 +1304,7 @@ function gameTurnPlayerVsPlayerTerminal(player1, player2) {
     }
 }
 
-masterGame();
-// gameMode();
+gameModeDOM();
+
+//for terminal game play
+// gameModeTerminal();

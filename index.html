@@ -11,18 +11,17 @@
     <div class='header'>
         <p>Battleship</p>
     </div>
-    <div class="controls">
+    <div class="controls" id='controls'>
         <button id='control1'>Example</button>
         <button id='control2'>Example</button>
     </div>
-    <div class='gameBoards'>
+    <div class='gameBoards' id='gameBoards'>
         <div class="boardGroup player1" id='player1'>
+            <div class="name" id='player1name'></div>
             <div class='board' id='player1Board'>
 
             </div>
-            <div class="name">
-
-            </div>
+            
             <div class='shipsBox' id='player1ships'></div>
         </div>
         <div class="commandLine" id='commandLine'>
@@ -36,11 +35,9 @@
             </div>
         </div>
         <div class='boardGroup player2'id="player2">
+            <div class="name" id='player2name'></div>
             <div class='board' id='player2Board'>
 
-            </div>
-            <div class="name">
-                
             </div>
             <div class='shipsBox' id='player2ships'></div>
         </div>
