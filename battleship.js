@@ -804,7 +804,9 @@ class DOM {
                 } else {
                     cell.textContent = "~"; // Grid content
                     cell.id = `${headers[row]}${col}`;
-                    cell.addEventListener("click", this.receiveInput(cell));
+                    cell.addEventListener("click", () =>
+                        this.receiveInput(cell),
+                    );
                 }
 
                 gridRow.appendChild(cell);

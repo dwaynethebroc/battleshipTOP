@@ -1,3 +1,33 @@
+@media (max-width: 600px) {
+    .gameBoards {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    .boardGroup {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .board {
+        justify-content: center;
+    }
+    
+    .controls{
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .shipsBox {
+        width: 90%; /* Prevents it from stretching too much */
+        justify-content: center;
+    }
+}
+
+
 div {
     border: 1px dotted grey
 }
@@ -27,14 +57,14 @@ form {
 .board1 {
     display: flex;
     flex-direction: row;
-    justify-content: left;
+    justify-content: center;
     width: 100%;
 } 
 
 .board2 {
     display: flex;
     flex-direction: row;
-    justify-content: right;
+    justify-content: center;
     width: 100%;
 } 
 
@@ -56,19 +86,18 @@ form {
 
 .controls {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     gap: 10px;
-    padding: 10px;
-    width: 33%;
+    width: 100%;
 }
 
 .commandLine{
     display: flex;
     flex-direction: column;
     padding: 10px;
-    width: 33%;
+    width: 100%;
 }
 
 .messages{
@@ -90,7 +119,7 @@ form {
 .shipsBox{
     display: flex;
     flex-direction: column;
-    width: 33%;
+    width: 100%;
 }
 
 .health{
