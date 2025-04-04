@@ -1028,22 +1028,123 @@ class DOM {
 
         for (const ship of shipTypes) {
             let shipPlacement = await this.promptShipDOM(ship);
+            let match = shipPlacement.match(coordinateRegex);
+
             console.log(shipPlacement);
+
+            while (!match || shipPlacement === "") {
+                shipPlacement = await this.promptShipDOM(ship);
+                match = shipPlacement.match(coordinateRegex);
+            }
+
+            let startingCoordinate = match[1] + match[2]; // e.g., "A2"
+            let endCoordinate = match[3] + match[4]; // e.g., "A5"
+
+            let boatLength = this.player1.playerBoard.lengthOfBoat(
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            let lengthsMatch =
+                this.player1.playerBoard.boatLengthEqualsShipType(
+                    boatLength,
+                    ship.length,
+                );
+
+            let outOfBounds = this.player1.playerBoard.outOfBounds(
+                boatLength,
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            let alreadyPlaced = this.player1.playerBoard.alreadyPlaced(
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            while (!lengthsMatch || outOfBounds || alreadyPlaced) {
+                this.errorMessageDOM(
+                    match,
+                    lengthsMatch,
+                    boatLength,
+                    ship.length,
+                    outOfBounds,
+                    alreadyPlaced,
+                );
+                shipPlacement = await this.promptShipDOM(ship);
+
+                match = shipPlacement.match(coordinateRegex);
+
+                startingCoordinate = match[1] + match[2]; // e.g., "A2"
+                endCoordinate = match[3] + match[4]; // e.g., "A5"
+
+                boatLength = this.player1.playerBoard.lengthOfBoat(
+                    startingCoordinate,
+                    endCoordinate,
+                );
+
+                lengthsMatch =
+                    this.player1.playerBoard.boatLengthEqualsShipType(
+                        boatLength,
+                        ship.length,
+                    );
+
+                outOfBounds = this.player1.playerBoard.outOfBounds(
+                    boatLength,
+                    startingCoordinate,
+                    endCoordinate,
+                );
+
+                alreadyPlaced = this.player1.playerBoard.alreadyPlaced(
+                    startingCoordinate,
+                    endCoordinate,
+                );
+            }
+
+            let orientation = this.player1.playerBoard.orientation(
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            const placement = this.player1.playerBoard.changeBoard(
+                startingCoordinate,
+                endCoordinate,
+                this.player1.playerBoard.board,
+                ship,
+            );
+
+            this.player1.playerBoard.ships.push(
+                new Ship(boatLength, placement, ship.type, orientation),
+            );
         }
+
+        console.log(this.player1.playerBoard.board);
+        console.log(this.player2.playerBoard.board);
     }
 
     async promptShipDOM(ship) {
         return new Promise(async (resolve) => {
+            const coordinateRegex = /^([A-Z]+)(\d+)-([A-Z]+)(\d+)$/; // Matches format "A2-A5"
             this.printMessage(
                 `Enter your coordinates for ${ship.type} of ship length ${ship.length}. (Example: (A2-A3)`,
             );
 
             const shipPlacement = await this.getInput();
 
-            this.printMessage(
-                `You have selected ${shipPlacement[0].col}${shipPlacement[0].row} - ${shipPlacement[1].col}${shipPlacement[1].row}`,
-            );
-            resolve(shipPlacement);
+            if (typeof shipPlacement === "object") {
+                this.printMessage(
+                    `You have selected ${shipPlacement[0].col}${shipPlacement[0].row} - ${shipPlacement[1].col}${shipPlacement[1].row}`,
+                );
+                resolve(
+                    `${shipPlacement[0].col}${shipPlacement[0].row}-${shipPlacement[1].col}${shipPlacement[1].row}`,
+                );
+            } else if (typeof shipPlacement === "string") {
+                let match = shipPlacement.match(coordinateRegex);
+                this.printMessage(
+                    `You have selected ${match[1]}${match[2]} - ${match[3]}${match[4]}`,
+                );
+                resolve(`${match[1]}${match[2]}-${match[3]}${match[4]}`);
+            }
         });
     }
 
@@ -1095,8 +1196,113 @@ class DOM {
         }
     }
 
-    async humanSetup(player) {
-        this.printMessage("human setup");
+    updateBoardDOM(player1Board, player2Board) {
+        const board1 = document.getElementById("player1Board");
+
+        const container1 = document.createElement("div");
+        container1.classList.add("board1");
+        const headers = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+
+        for (let row = 0; row < 11; row++) {
+            const gridRow = document.createElement("div");
+            for (let col = 0; col < 11; col++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+
+                if (row === 0 && col === 0) {
+                    cell.textContent = ""; // Top-left empty cell
+                } else if (row === 0) {
+                    cell.textContent = col; // Column headers
+                } else if (col === 0) {
+                    cell.textContent = headers[row]; // Row headers
+                } else {
+                    cell.textContent = "~"; // Grid content
+                    cell.id = `${headers[row]}${col}`;
+                    cell.dataset.col = `${headers[row]}`; //Letter / Column
+                    cell.dataset.row = `${col}`; //Number / Row
+                    cell.dataset.colIndex = row;
+                    cell.dataset.rowIndex = col;
+                    cell.addEventListener("click", () =>
+                        this.receiveInput(cell),
+                    );
+                    cell.classList.add("coordinate");
+                }
+
+                gridRow.appendChild(cell);
+            }
+            container1.appendChild(gridRow);
+        }
+        board1.appendChild(container1);
+
+        //board2
+        const board2 = document.getElementById("player2Board");
+
+        const container2 = document.createElement("div");
+        container2.classList.add("board2");
+
+        for (let row = 0; row < 11; row++) {
+            const gridRow = document.createElement("div");
+            for (let col = 0; col < 11; col++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+
+                if (row === 0 && col === 0) {
+                    cell.textContent = ""; // Top-left empty cell
+                } else if (row === 0) {
+                    cell.textContent = col; // Column headers
+                } else if (col === 0) {
+                    cell.textContent = headers[row]; // Row headers
+                } else {
+                    cell.textContent = "~"; // Grid content
+                    cell.id = `${headers[row]}${col}`;
+                    cell.dataset.col = `${headers[row]}`; //Letter / Column
+                    cell.dataset.row = `${col}`; //Number / Row
+                    cell.dataset.colIndex = row;
+                    cell.dataset.rowIndex = col;
+                    cell.addEventListener("click", () =>
+                        this.receiveInput(cell),
+                    );
+                    cell.classList.add("coordinate");
+                }
+
+                gridRow.appendChild(cell);
+            }
+            container2.appendChild(gridRow);
+        }
+        board2.appendChild(container2);
+    }
+
+    errorMessageDOM(
+        match,
+        length,
+        userInput,
+        shipLength,
+        outOfBounds,
+        alreadyPlaced,
+    ) {
+        if (!length && match[1] != match[3] && match[2] != match[4]) {
+            this.printMessage(`It's not possible to place pieces diagonally`);
+        } else if (Number(match[4]) < Number(match[2])) {
+            this.printMessage(
+                "Make sure to place ships with coordinates Left to Right, Top to Bottom",
+            );
+        } else if (!match || match === null) {
+            this.printMessage(
+                "Invalid coordinate format. Please use the format 'A2-A5'.",
+            );
+        } else if (!length) {
+            this.printMessage(
+                `Your coordinates are the incorrect length.\nYour coordinate length: ${userInput}\nBoat length: ${shipLength}\n`,
+            );
+        } else if (outOfBounds) {
+            this.printMessage(
+                `Your coordinates are out of the bounds of the grid. Pick gridpoints between A-J and 1-10`,
+            );
+        } else if (alreadyPlaced) {
+            this.printMessage(
+                `You have already placed a ship on atleast one of your chosen squares. Pick a new coordinate range.`,
+            );
+        }
     }
 
     // computerSetup() {
