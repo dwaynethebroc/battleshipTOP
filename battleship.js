@@ -1196,80 +1196,91 @@ class DOM {
         }
     }
 
-    updateBoardDOM(player1Board, player2Board) {
-        const board1 = document.getElementById("player1Board");
-
-        const container1 = document.createElement("div");
-        container1.classList.add("board1");
+    updateBoardDOM(board, player) {
+        //determine which player it is, then update the correct board and display it
         const headers = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
-        for (let row = 0; row < 11; row++) {
-            const gridRow = document.createElement("div");
-            for (let col = 0; col < 11; col++) {
-                const cell = document.createElement("div");
-                cell.classList.add("cell");
+        if (player === this.player1) {
+            //board 1
+            const board1 = document.getElementById("player1Board");
 
-                if (row === 0 && col === 0) {
-                    cell.textContent = ""; // Top-left empty cell
-                } else if (row === 0) {
-                    cell.textContent = col; // Column headers
-                } else if (col === 0) {
-                    cell.textContent = headers[row]; // Row headers
-                } else {
-                    cell.textContent = "~"; // Grid content
-                    cell.id = `${headers[row]}${col}`;
-                    cell.dataset.col = `${headers[row]}`; //Letter / Column
-                    cell.dataset.row = `${col}`; //Number / Row
-                    cell.dataset.colIndex = row;
-                    cell.dataset.rowIndex = col;
-                    cell.addEventListener("click", () =>
-                        this.receiveInput(cell),
-                    );
-                    cell.classList.add("coordinate");
+            board1.textContent = ""; //clear board
+
+            const container1 = document.createElement("div");
+            container1.classList.add("board1");
+
+            //update board with player board data
+            for (let row = 0; row < 11; row++) {
+                const gridRow = document.createElement("div");
+                for (let col = 0; col < 11; col++) {
+                    const cell = document.createElement("div");
+                    cell.classList.add("cell");
+
+                    if (row === 0 && col === 0) {
+                        cell.textContent = ""; // Top-left empty cell
+                    } else if (row === 0) {
+                        cell.textContent = col; // Column headers
+                    } else if (col === 0) {
+                        cell.textContent = headers[row]; // Row headers
+                    } else {
+                        cell.textContent = "~"; // Grid content
+                        cell.id = `${headers[row]}${col}`;
+                        cell.dataset.col = `${headers[row]}`; //Letter / Column
+                        cell.dataset.row = `${col}`; //Number / Row
+                        cell.dataset.colIndex = row;
+                        cell.dataset.rowIndex = col;
+                        cell.addEventListener("click", () =>
+                            this.receiveInput(cell),
+                        );
+                        cell.classList.add("coordinate");
+                    }
+
+                    gridRow.appendChild(cell);
                 }
-
-                gridRow.appendChild(cell);
+                container1.appendChild(gridRow);
             }
-            container1.appendChild(gridRow);
-        }
-        board1.appendChild(container1);
+            board1.appendChild(container1);
+        } else if (player === this.player2) {
+            //board2
+            const board2 = document.getElementById("player2Board");
 
-        //board2
-        const board2 = document.getElementById("player2Board");
+            board2.textContent = ""; //clear board
 
-        const container2 = document.createElement("div");
-        container2.classList.add("board2");
+            const container2 = document.createElement("div");
+            container2.classList.add("board2");
 
-        for (let row = 0; row < 11; row++) {
-            const gridRow = document.createElement("div");
-            for (let col = 0; col < 11; col++) {
-                const cell = document.createElement("div");
-                cell.classList.add("cell");
+            //update board with player board data
+            for (let row = 0; row < 11; row++) {
+                const gridRow = document.createElement("div");
+                for (let col = 0; col < 11; col++) {
+                    const cell = document.createElement("div");
+                    cell.classList.add("cell");
 
-                if (row === 0 && col === 0) {
-                    cell.textContent = ""; // Top-left empty cell
-                } else if (row === 0) {
-                    cell.textContent = col; // Column headers
-                } else if (col === 0) {
-                    cell.textContent = headers[row]; // Row headers
-                } else {
-                    cell.textContent = "~"; // Grid content
-                    cell.id = `${headers[row]}${col}`;
-                    cell.dataset.col = `${headers[row]}`; //Letter / Column
-                    cell.dataset.row = `${col}`; //Number / Row
-                    cell.dataset.colIndex = row;
-                    cell.dataset.rowIndex = col;
-                    cell.addEventListener("click", () =>
-                        this.receiveInput(cell),
-                    );
-                    cell.classList.add("coordinate");
+                    if (row === 0 && col === 0) {
+                        cell.textContent = ""; // Top-left empty cell
+                    } else if (row === 0) {
+                        cell.textContent = col; // Column headers
+                    } else if (col === 0) {
+                        cell.textContent = headers[row]; // Row headers
+                    } else {
+                        cell.textContent = "~"; // Grid content
+                        cell.id = `${headers[row]}${col}`;
+                        cell.dataset.col = `${headers[row]}`; //Letter / Column
+                        cell.dataset.row = `${col}`; //Number / Row
+                        cell.dataset.colIndex = row;
+                        cell.dataset.rowIndex = col;
+                        cell.addEventListener("click", () =>
+                            this.receiveInput(cell),
+                        );
+                        cell.classList.add("coordinate");
+                    }
+
+                    gridRow.appendChild(cell);
                 }
-
-                gridRow.appendChild(cell);
+                container2.appendChild(gridRow);
             }
-            container2.appendChild(gridRow);
+            board2.appendChild(container2);
         }
-        board2.appendChild(container2);
     }
 
     errorMessageDOM(
