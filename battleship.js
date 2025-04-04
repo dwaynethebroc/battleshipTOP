@@ -775,9 +775,12 @@ class DOM {
                 } else {
                     cell.textContent = "~"; // Grid content
                     cell.id = `${headers[row]}${col}`;
+                    cell.dataset.col = `${headers[row]}`; //Letter / Column
+                    cell.dataset.row = `${col}`; //Number / Row
                     cell.addEventListener("click", () =>
                         this.receiveInput(cell),
                     );
+                    cell.classList.add("coordinate");
                 }
 
                 gridRow.appendChild(cell);
@@ -920,25 +923,64 @@ class DOM {
         });
     }
 
-    getInput = () => {
+    async getInput(mode = "both") {
         return new Promise((resolve) => {
             const text = document.getElementById("answer");
             const submitButton = document.getElementById("submit");
+            const gridCells = document.querySelectorAll(".coordinate");
 
-            // Listen for the form submission
-            const handleSubmit = () => {
+            let firstClick = null;
+
+            function handleGridClicks(event) {
+                if (mode === "commandLine") return; //ignore clicks
+
+                const cell = event.target;
+                let col = cell.dataset.col;
+                let row = cell.dataset.row;
+
+                if (mode === "grid") {
+                    cleanup();
+                    resolve({ col, row });
+                } else if (mode === "both") {
+                    if (!firstClick) {
+                        firstClick = { col, row }; //Single click mode
+                    } else {
+                        const secondClick = { col, row };
+                        cleanup();
+                        resolve([firstClick, secondClick]); // returns two clicks
+                    }
+                }
+            }
+
+            function handleSubmit() {
+                if (mode === "grid") return; //ignore keyboard input
+
                 const input = text.value.trim();
                 if (input !== "") {
                     text.value = "";
-                    this.printMessage(input);
                     submitButton.removeEventListener("click", handleSubmit);
-                    resolve(input); // Resolve the promise with user input
+                    cleanup();
+                    resolve(input);
                 }
-            };
+            }
 
-            submitButton.addEventListener("click", handleSubmit);
+            function cleanup() {
+                submitButton.removeEventListener("click", handleSubmit);
+                gridCells.forEach((cell) =>
+                    cell.removeEventListener("click", handleGridClicks),
+                );
+            }
+
+            if (mode !== "grid") {
+                submitButton.addEventListener("click", handleSubmit);
+            }
+            if (mode !== "commandLine") {
+                gridCells.forEach((cell) =>
+                    cell.addEventListener("click", handleGridClicks),
+                );
+            }
         });
-    };
+    }
 
     printMessage(input) {
         const messageBox = document.getElementById("messages");
@@ -964,7 +1006,7 @@ class DOM {
         console.log(this.lastPressedCell);
     }
 
-    placeShipsDOM() {
+    async humanSetupDOM() {
         const shipTypes = [
             { length: 2, type: "patrol" },
             { length: 3, type: "submarine" },
@@ -975,13 +1017,13 @@ class DOM {
 
         const coordinateRegex = /^([A-Z]+)(\d+)-([A-Z]+)(\d+)$/; // Matches format "A2-A5"
 
-        shipTypes.forEach((ship) => {
-            let shipPlacement = this.promptShipDOM(ship);
+        shipTypes.forEach(async (ship) => {
+            let shipPlacement = await this.promptShipDOM(ship);
             let match = shipPlacement.match(coordinateRegex);
 
             while (!match || shipPlacement === "") {
                 this.printBoard(this.board);
-                shipPlacement = this.promptShip(ship);
+                shipPlacement = this.promptShipDOM(ship);
                 match = shipPlacement.match(coordinateRegex);
             }
 
@@ -1069,30 +1111,33 @@ class DOM {
         });
     }
 
-    promptShipDOM(ship) {
-        this.printMessage(
-            `Ship to be placed ${ship} of ship length ${ship.length}`,
-        );
+    async promptShipDOM(ship) {
+        return new Promise(async (resolve) => {
+            this.printMessage(
+                `Enter your coordinates for ${ship.type} of ship length ${ship.length}. (Example: (A2-A3)`,
+            );
+
+            const shipPlacement = await this.getInput();
+            resolve(shipPlacement);
+        });
     }
-    //gameModeDOM() {}
 
     // updateBoard() {}
 
     // resetDOM() {}
 
-    async gameModeDOM() {
+    async gameModeDOMMasterSetup() {
         this.setupDOM();
-        const selectedGameMode = await display.gameModeDOM();
+        const selectedGameMode = await this.gameModeDOM();
 
-        let playerName;
-        let playerName2;
+        let playerName, playerName2;
 
         const nameDiv1 = document.getElementById("player1name");
         const nameDiv2 = document.getElementById("player2name");
 
         if (selectedGameMode === "vsComputer") {
             this.printMessage("What is your name admiral?");
-            playerName = await display.getInput();
+            playerName = await this.getInput();
 
             nameDiv1.textContent = playerName;
             nameDiv2.textContent = "Computer";
@@ -1100,33 +1145,33 @@ class DOM {
             this.player1 = new Player("human", playerName, "vsComputer");
             this.player2 = new Player("computer", "computer", "vsComputer");
 
-            this.player2.playerBoard.SetupComputer();
-            this.humanSetup(player1);
+            this.player2.playerBoard.boardSetupComputer();
+            this.humanSetupDOM();
 
-            this.gameTurnVsComputerDOM(this.player1, this.player2);
+            // this.gameTurnVsComputerDOM(this.player1, this.player2);
         } else if (selectedGameMode === "PVP") {
-            display.printMessage("What is player 1's name admiral?");
-            playerName = await display.getInput();
+            this.printMessage("What is player 1's name admiral?");
+            playerName = await this.getInput();
 
             nameDiv1.textContent = playerName;
 
-            display.printMessage("What is player 2's name admiral?");
-            playerName2 = await display.getInput();
+            this.printMessage("What is player 2's name admiral?");
+            playerName2 = await this.getInput();
 
             nameDiv2.textContent = playerName2;
 
             this.player1 = new Player("human", playerName, "PVP");
             this.player2 = new Player("human", playerName2, "PVP");
 
-            this.humanSetup(player1);
-            this.humanSetup(player2);
+            // this.humanSetup(player1);
+            // this.humanSetup(player2);
 
-            this.gameTurnPVPDOM(this.player1, this.player2);
+            // this.gameTurnPVPDOM(this.player1, this.player2);
         }
     }
 
     async humanSetup(player) {
-        this.printMessage("");
+        this.printMessage("human setup");
     }
 
     // computerSetup() {
@@ -1137,7 +1182,7 @@ class DOM {
         const messages = document.getElementById("messages");
         messages.textContent = "";
 
-        display.printMessage("Please select the coordinates for your ship");
+        this.printMessage("Please select the coordinates for your ship");
 
         human.boardSetupHuman();
     }
@@ -1438,7 +1483,7 @@ function gameTurnPlayerVsPlayerTerminal(player1, player2) {
 }
 
 const display = new DOM();
-display.gameModeDOM();
+display.gameModeDOMMasterSetup();
 
 //for terminal game play
 // gameModeTerminal();
