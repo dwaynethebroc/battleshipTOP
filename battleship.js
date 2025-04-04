@@ -777,6 +777,8 @@ class DOM {
                     cell.id = `${headers[row]}${col}`;
                     cell.dataset.col = `${headers[row]}`; //Letter / Column
                     cell.dataset.row = `${col}`; //Number / Row
+                    cell.dataset.colIndex = row;
+                    cell.dataset.rowIndex = col;
                     cell.addEventListener("click", () =>
                         this.receiveInput(cell),
                     );
@@ -810,9 +812,14 @@ class DOM {
                 } else {
                     cell.textContent = "~"; // Grid content
                     cell.id = `${headers[row]}${col}`;
+                    cell.dataset.col = `${headers[row]}`; //Letter / Column
+                    cell.dataset.row = `${col}`; //Number / Row
+                    cell.dataset.colIndex = row;
+                    cell.dataset.rowIndex = col;
                     cell.addEventListener("click", () =>
                         this.receiveInput(cell),
                     );
+                    cell.classList.add("coordinate");
                 }
 
                 gridRow.appendChild(cell);
@@ -937,15 +944,17 @@ class DOM {
                 const cell = event.target;
                 let col = cell.dataset.col;
                 let row = cell.dataset.row;
+                let colIndex = cell.dataset.colIndex;
+                let rowIndex = cell.dataset.rowIndex;
 
                 if (mode === "grid") {
                     cleanup();
                     resolve({ col, row });
                 } else if (mode === "both") {
                     if (!firstClick) {
-                        firstClick = { col, row }; //Single click mode
+                        firstClick = { col, row, colIndex, rowIndex }; //Single click mode
                     } else {
-                        const secondClick = { col, row };
+                        const secondClick = { col, row, colIndex, rowIndex };
                         cleanup();
                         resolve([firstClick, secondClick]); // returns two clicks
                     }
@@ -1017,98 +1026,10 @@ class DOM {
 
         const coordinateRegex = /^([A-Z]+)(\d+)-([A-Z]+)(\d+)$/; // Matches format "A2-A5"
 
-        shipTypes.forEach(async (ship) => {
+        for (const ship of shipTypes) {
             let shipPlacement = await this.promptShipDOM(ship);
-            let match = shipPlacement.match(coordinateRegex);
-
-            while (!match || shipPlacement === "") {
-                this.printBoard(this.board);
-                shipPlacement = this.promptShipDOM(ship);
-                match = shipPlacement.match(coordinateRegex);
-            }
-
-            let startingCoordinate = match[1] + match[2]; // e.g., "A2"
-            let endCoordinate = match[3] + match[4]; // e.g., "A5"
-
-            let boatLength = this.lengthOfBoat(
-                startingCoordinate,
-                endCoordinate,
-            );
-
-            let lengthsMatch = this.boatLengthEqualsShipType(
-                boatLength,
-                ship.length,
-            );
-
-            let outOfBounds = this.outOfBounds(
-                boatLength,
-                startingCoordinate,
-                endCoordinate,
-            );
-
-            let alreadyPlaced = this.alreadyPlaced(
-                startingCoordinate,
-                endCoordinate,
-            );
-
-            while (!lengthsMatch || outOfBounds || alreadyPlaced) {
-                this.printBoard(this.board);
-
-                this.errorMessage(
-                    match,
-                    lengthsMatch,
-                    boatLength,
-                    ship.length,
-                    outOfBounds,
-                    alreadyPlaced,
-                );
-
-                shipPlacement = this.promptShip(ship);
-
-                match = shipPlacement.match(coordinateRegex);
-
-                startingCoordinate = match[1] + match[2]; // e.g., "A2"
-                endCoordinate = match[3] + match[4]; // e.g., "A5"
-
-                boatLength = this.lengthOfBoat(
-                    startingCoordinate,
-                    endCoordinate,
-                );
-
-                lengthsMatch = this.boatLengthEqualsShipType(
-                    boatLength,
-                    ship.length,
-                );
-
-                outOfBounds = this.outOfBounds(
-                    boatLength,
-                    startingCoordinate,
-                    endCoordinate,
-                );
-
-                alreadyPlaced = this.alreadyPlaced(
-                    startingCoordinate,
-                    endCoordinate,
-                );
-            }
-
-            let orientation = this.orientation(
-                startingCoordinate,
-                endCoordinate,
-            );
-
-            const placement = this.changeBoard(
-                startingCoordinate,
-                endCoordinate,
-                this.board,
-                ship,
-            );
-
-            this.ships.push(
-                new Ship(boatLength, placement, ship.type, orientation),
-            );
-            this.printBoard(this.board);
-        });
+            console.log(shipPlacement);
+        }
     }
 
     async promptShipDOM(ship) {
@@ -1118,6 +1039,10 @@ class DOM {
             );
 
             const shipPlacement = await this.getInput();
+
+            this.printMessage(
+                `You have selected ${shipPlacement[0].col}${shipPlacement[0].row} - ${shipPlacement[1].col}${shipPlacement[1].row}`,
+            );
             resolve(shipPlacement);
         });
     }
