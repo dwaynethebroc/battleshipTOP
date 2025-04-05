@@ -870,6 +870,7 @@ class DOM {
                     const div = document.createElement("div");
                     div.textContent = "";
                     div.classList.add("healthBox");
+                    div.classList.add(`${ship.type.toLowerCase()}HPP1`);
                     healthContainer.appendChild(div);
                 }
             }
@@ -895,6 +896,7 @@ class DOM {
                     const div = document.createElement("div");
                     div.textContent = "";
                     div.classList.add("healthBox");
+                    div.classList.add(`${ship.type.toLowerCase()}HPP2`);
                     healthContainer.appendChild(div);
                 }
             }
@@ -1410,6 +1412,34 @@ class DOM {
         }
     }
 
+    updateShipsDOM(player) {
+        const ships = player.playerBoard.ships;
+
+        if (player === this.player1) {
+            ships.forEach((ship) => {
+                if (ship.sunk === true) {
+                    const healthBoxes = document.getElementsByClassName(
+                        `${ship.type}HPP1`,
+                    );
+                    Array.from(healthBoxes).forEach((healthBox) => {
+                        healthBox.classList.add("hit");
+                    });
+                }
+            });
+        } else if (player === this.player2) {
+            ships.forEach((ship) => {
+                if (ship.sunk === true) {
+                    const healthBoxes = document.getElementsByClassName(
+                        `${ship.type}HPP2`,
+                    );
+                    Array.from(healthBoxes).forEach((healthBox) => {
+                        healthBox.classList.add("hit");
+                    });
+                }
+            });
+        }
+    }
+
     errorMessageDOM(
         match,
         length,
@@ -1483,6 +1513,7 @@ class DOM {
         let gameOver = false;
 
         computer.playerBoard.opponentsBoard = human.playerBoard.board;
+        console.log(human.playerBoard.ships);
 
         while (!gameOver) {
             if (whosTurn === human) {
@@ -1494,6 +1525,9 @@ class DOM {
                     computer,
                     computer.playerBoard.opponentsBoard,
                 );
+
+                this.updateShipsDOM(human);
+                this.updateShipsDOM(computer);
 
                 //human prompt
                 const guess = await this.promptAttackDOM();
@@ -1537,6 +1571,10 @@ class DOM {
                         computer,
                         computer.playerBoard.opponentsBoard,
                     );
+
+                    this.updateShipsDOM(human);
+                    this.updateShipsDOM(computer);
+
                     gameOver = true;
                 }
 
@@ -1545,6 +1583,9 @@ class DOM {
                 // Computer's turn
                 const guess = computer.playerBoard.promptAttackComputer();
                 const result = human.playerBoard.receiveAttack(guess);
+
+                this.updateShipsDOM(human);
+                this.updateShipsDOM(computer);
 
                 if (result.result === "hit") {
                     const [col, row] = [
@@ -1586,6 +1627,9 @@ class DOM {
                         computer,
                         computer.playerBoard.opponentsBoard,
                     );
+
+                    this.updateShipsDOM(human);
+                    this.updateShipsDOM(computer);
 
                     this.printMessage(
                         "All your ships are sunk! Computer wins!",
