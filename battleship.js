@@ -734,6 +734,12 @@ class DOM {
         this.messages = [];
         this.lastPressedCell = "";
         this.gameMode = "";
+
+        this.anchorCell = null;
+        this.hoveredCells = [];
+        this.placementActive = true;
+        this.firstCell = null;
+        this.tempHighlightedCells = [];
     }
 
     setupDOM() {
@@ -1011,11 +1017,69 @@ class DOM {
     }
 
     receiveInput(div) {
-        this.lastPressedCell = div.id;
-        console.log(this.lastPressedCell);
+        if (!this.placementActive) return;
+
+        const isCoordinate = div.classList.contains("coordinate");
+        if (!isCoordinate) return;
+
+        const row = parseInt(div.dataset.rowIndex);
+        const col = parseInt(div.dataset.colIndex);
+
+        if (!this.anchorCell) {
+            // First click: anchor point
+            this.anchorCell = div;
+            div.classList.add("anchor");
+            div.style.backgroundColor = "blue";
+        } else {
+            // Second click: finalize ship placement
+            const anchorRow = parseInt(this.anchorCell.dataset.rowIndex);
+            const anchorCol = parseInt(this.anchorCell.dataset.colIndex);
+
+            const cellsToColor = this.getCellsBetween(
+                anchorRow,
+                anchorCol,
+                row,
+                col,
+            );
+
+            for (let cell of cellsToColor) {
+                cell.classList.add("selected");
+                cell.style.backgroundColor = "blue";
+            }
+
+            // Lock in
+            this.placementActive = false;
+        }
     }
 
-    async humanSetupDOM() {
+    getCellsBetween(startRow, startCol, endRow, endCol) {
+        const cells = [];
+
+        // Only allow vertical or horizontal
+        if (startRow === endRow) {
+            const min = Math.min(startCol, endCol);
+            const max = Math.max(startCol, endCol);
+            for (let col = min; col <= max; col++) {
+                const cell = document.querySelector(
+                    `[data-row-index='${startRow}'][data-col-index='${col}']`,
+                );
+                if (cell) cells.push(cell);
+            }
+        } else if (startCol === endCol) {
+            const min = Math.min(startRow, endRow);
+            const max = Math.max(startRow, endRow);
+            for (let row = min; row <= max; row++) {
+                const cell = document.querySelector(
+                    `[data-row-index='${row}'][data-col-index='${startCol}']`,
+                );
+                if (cell) cells.push(cell);
+            }
+        }
+
+        return cells;
+    }
+
+    async humanSetupDOM(player) {
         const shipTypes = [
             { length: 2, type: "patrol" },
             { length: 3, type: "submarine" },
@@ -1040,24 +1104,23 @@ class DOM {
             let startingCoordinate = match[1] + match[2]; // e.g., "A2"
             let endCoordinate = match[3] + match[4]; // e.g., "A5"
 
-            let boatLength = this.player1.playerBoard.lengthOfBoat(
+            let boatLength = player.playerBoard.lengthOfBoat(
                 startingCoordinate,
                 endCoordinate,
             );
 
-            let lengthsMatch =
-                this.player1.playerBoard.boatLengthEqualsShipType(
-                    boatLength,
-                    ship.length,
-                );
+            let lengthsMatch = player.playerBoard.boatLengthEqualsShipType(
+                boatLength,
+                ship.length,
+            );
 
-            let outOfBounds = this.player1.playerBoard.outOfBounds(
+            let outOfBounds = player.playerBoard.outOfBounds(
                 boatLength,
                 startingCoordinate,
                 endCoordinate,
             );
 
-            let alreadyPlaced = this.player1.playerBoard.alreadyPlaced(
+            let alreadyPlaced = player.playerBoard.alreadyPlaced(
                 startingCoordinate,
                 endCoordinate,
             );
@@ -1078,44 +1141,45 @@ class DOM {
                 startingCoordinate = match[1] + match[2]; // e.g., "A2"
                 endCoordinate = match[3] + match[4]; // e.g., "A5"
 
-                boatLength = this.player1.playerBoard.lengthOfBoat(
+                boatLength = player.playerBoard.lengthOfBoat(
                     startingCoordinate,
                     endCoordinate,
                 );
 
-                lengthsMatch =
-                    this.player1.playerBoard.boatLengthEqualsShipType(
-                        boatLength,
-                        ship.length,
-                    );
+                lengthsMatch = player.playerBoard.boatLengthEqualsShipType(
+                    boatLength,
+                    ship.length,
+                );
 
-                outOfBounds = this.player1.playerBoard.outOfBounds(
+                outOfBounds = player.playerBoard.outOfBounds(
                     boatLength,
                     startingCoordinate,
                     endCoordinate,
                 );
 
-                alreadyPlaced = this.player1.playerBoard.alreadyPlaced(
+                alreadyPlaced = player.playerBoard.alreadyPlaced(
                     startingCoordinate,
                     endCoordinate,
                 );
             }
 
-            let orientation = this.player1.playerBoard.orientation(
+            let orientation = player.playerBoard.orientation(
                 startingCoordinate,
                 endCoordinate,
             );
 
-            const placement = this.player1.playerBoard.changeBoard(
+            const placement = player.playerBoard.changeBoard(
                 startingCoordinate,
                 endCoordinate,
-                this.player1.playerBoard.board,
+                player.playerBoard.board,
                 ship,
             );
 
-            this.player1.playerBoard.ships.push(
+            player.playerBoard.ships.push(
                 new Ship(boatLength, placement, ship.type, orientation),
             );
+
+            this.updateBoardDOM(player, player.playerBoard.board);
         }
 
         console.log(this.player1.playerBoard.board);
@@ -1126,7 +1190,7 @@ class DOM {
         return new Promise(async (resolve) => {
             const coordinateRegex = /^([A-Z]+)(\d+)-([A-Z]+)(\d+)$/; // Matches format "A2-A5"
             this.printMessage(
-                `Enter your coordinates for ${ship.type} of ship length ${ship.length}. (Example: (A2-A3)`,
+                `Enter coordinates for ${ship.type} of ship length ${ship.length}. (Example: (A2-A3) \n You can either press the start and end points on the board OR enter the coordinates on the command line below.`,
             );
 
             const shipPlacement = await this.getInput();
@@ -1163,7 +1227,7 @@ class DOM {
 
         if (selectedGameMode === "vsComputer") {
             this.printMessage("What is your name admiral?");
-            playerName = await this.getInput();
+            playerName = await this.getInput("commandLine");
 
             nameDiv1.textContent = playerName;
             nameDiv2.textContent = "Computer";
@@ -1172,31 +1236,33 @@ class DOM {
             this.player2 = new Player("computer", "computer", "vsComputer");
 
             this.player2.playerBoard.boardSetupComputer();
-            this.humanSetupDOM();
+            await this.humanSetupDOM(this.player1);
+
+            this.updateBoardDOM(this.player1, this.player1.playerBoard.board);
 
             // this.gameTurnVsComputerDOM(this.player1, this.player2);
         } else if (selectedGameMode === "PVP") {
             this.printMessage("What is player 1's name admiral?");
-            playerName = await this.getInput();
+            playerName = await this.getInput("commandLine");
 
             nameDiv1.textContent = playerName;
 
             this.printMessage("What is player 2's name admiral?");
-            playerName2 = await this.getInput();
+            playerName2 = await this.getInput("commandLine");
 
             nameDiv2.textContent = playerName2;
 
             this.player1 = new Player("human", playerName, "PVP");
             this.player2 = new Player("human", playerName2, "PVP");
 
-            // this.humanSetup(player1);
-            // this.humanSetup(player2);
+            await this.humanSetupDOM(this.player1);
+            await this.humanSetupDOM(this.player2);
 
             // this.gameTurnPVPDOM(this.player1, this.player2);
         }
     }
 
-    updateBoardDOM(board, player) {
+    updateBoardDOM(player, board) {
         //determine which player it is, then update the correct board and display it
         const headers = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
@@ -1223,7 +1289,7 @@ class DOM {
                     } else if (col === 0) {
                         cell.textContent = headers[row]; // Row headers
                     } else {
-                        cell.textContent = "~"; // Grid content
+                        cell.textContent = board[col][row]; // Grid content
                         cell.id = `${headers[row]}${col}`;
                         cell.dataset.col = `${headers[row]}`; //Letter / Column
                         cell.dataset.row = `${col}`; //Number / Row
@@ -1263,7 +1329,7 @@ class DOM {
                     } else if (col === 0) {
                         cell.textContent = headers[row]; // Row headers
                     } else {
-                        cell.textContent = "~"; // Grid content
+                        cell.textContent = board[col][row]; // Grid content
                         cell.id = `${headers[row]}${col}`;
                         cell.dataset.col = `${headers[row]}`; //Letter / Column
                         cell.dataset.row = `${col}`; //Number / Row
