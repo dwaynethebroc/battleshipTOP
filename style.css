@@ -27,6 +27,15 @@
     }
 }
 
+.anchor {
+    background-color: lightblue !important;
+}
+
+.highlight {
+    background-color: lightblue !important;
+}
+
+
 
 div {
     border: 1px dotted grey

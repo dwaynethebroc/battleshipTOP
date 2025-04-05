@@ -1016,61 +1016,98 @@ class DOM {
         });
     }
 
-    receiveInput(div) {
-        if (!this.placementActive) return;
+    receiveInput(cell) {
+        // First click
+        if (!this.firstCell) {
+            this.firstCell = cell;
+            this.firstCell.classList.add("anchor");
 
-        const isCoordinate = div.classList.contains("coordinate");
-        if (!isCoordinate) return;
-
-        const row = parseInt(div.dataset.rowIndex);
-        const col = parseInt(div.dataset.colIndex);
-
-        if (!this.anchorCell) {
-            // First click: anchor point
-            this.anchorCell = div;
-            div.classList.add("anchor");
-            div.style.backgroundColor = "blue";
+            // Attach hover event to all coordinate cells
+            document.querySelectorAll(".coordinate").forEach((c) => {
+                c.addEventListener(
+                    "mouseover",
+                    (this.hoverPreviewBound = this.hoverPreview.bind(this)),
+                );
+            });
         } else {
-            // Second click: finalize ship placement
-            const anchorRow = parseInt(this.anchorCell.dataset.rowIndex);
-            const anchorCol = parseInt(this.anchorCell.dataset.colIndex);
+            // Second click (confirm)
+            // Remove mouseover listeners
+            document.querySelectorAll(".coordinate").forEach((c) => {
+                c.removeEventListener("mouseover", this.hoverPreviewBound);
+            });
 
-            const cellsToColor = this.getCellsBetween(
-                anchorRow,
-                anchorCol,
-                row,
-                col,
+            // Remove temp highlights
+            this.tempHighlightedCells.forEach((c) =>
+                c.classList.remove("highlight"),
             );
+            this.tempHighlightedCells = [];
 
-            for (let cell of cellsToColor) {
-                cell.classList.add("selected");
-                cell.style.backgroundColor = "blue";
-            }
+            // Pass input (start + end cell) to getInput
+            this.getInput([this.firstCell, cell]);
 
-            // Lock in
-            this.placementActive = false;
+            // Reset anchor cell
+            this.firstCell.classList.remove("anchor");
+            this.firstCell = null;
         }
+    }
+
+    hoverPreview(event) {
+        if (!this.firstCell) return; // Do nothing if no anchor set
+
+        // Get hovered cell
+        const hoverCell = event.target;
+
+        // Parse anchor and hovered cell positions
+        const startRow = parseInt(this.firstCell.dataset.row);
+        const startCol = this.firstCell.dataset.col;
+        const endRow = parseInt(hoverCell.dataset.row);
+        const endCol = hoverCell.dataset.col;
+
+        // Clear previous highlights
+        this.tempHighlightedCells.forEach((cell) =>
+            cell.classList.remove("highlight"),
+        );
+        this.tempHighlightedCells = [];
+
+        // Get new range and highlight it
+        this.tempHighlightedCells = this.getCellsBetween(
+            startRow,
+            startCol,
+            endRow,
+            endCol,
+        );
+        this.tempHighlightedCells.forEach((cell) =>
+            cell.classList.add("highlight"),
+        );
     }
 
     getCellsBetween(startRow, startCol, endRow, endCol) {
         const cells = [];
 
-        // Only allow vertical or horizontal
-        if (startRow === endRow) {
-            const min = Math.min(startCol, endCol);
-            const max = Math.max(startCol, endCol);
-            for (let col = min; col <= max; col++) {
+        if (startCol === endCol) {
+            // Vertical selection (same column, different rows)
+            const minRow = Math.min(startRow, endRow);
+            const maxRow = Math.max(startRow, endRow);
+            for (let row = minRow; row <= maxRow; row++) {
                 const cell = document.querySelector(
-                    `[data-row-index='${startRow}'][data-col-index='${col}']`,
+                    `[data-col='${startCol}'][data-row='${row}']`,
                 );
                 if (cell) cells.push(cell);
             }
-        } else if (startCol === endCol) {
-            const min = Math.min(startRow, endRow);
-            const max = Math.max(startRow, endRow);
-            for (let row = min; row <= max; row++) {
+        } else if (startRow === endRow) {
+            // Horizontal selection (same row, different columns)
+            const minCol = Math.min(
+                startCol.charCodeAt(0),
+                endCol.charCodeAt(0),
+            );
+            const maxCol = Math.max(
+                startCol.charCodeAt(0),
+                endCol.charCodeAt(0),
+            );
+            for (let col = minCol; col <= maxCol; col++) {
+                const colLetter = String.fromCharCode(col);
                 const cell = document.querySelector(
-                    `[data-row-index='${row}'][data-col-index='${startCol}']`,
+                    `[data-col='${colLetter}'][data-row='${startRow}']`,
                 );
                 if (cell) cells.push(cell);
             }
@@ -1162,6 +1199,12 @@ class DOM {
                     endCoordinate,
                 );
             }
+
+            // Clear highlights once ship is placed
+            this.tempHighlightedCells.forEach((cell) =>
+                cell.classList.remove("highlight"),
+            );
+            this.tempHighlightedCells = [];
 
             let orientation = player.playerBoard.orientation(
                 startingCoordinate,
