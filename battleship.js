@@ -604,7 +604,7 @@ class Gameboard {
 
         if (this.educatedGuesses.length > 0) {
             //while the guess has already been made, use the first array index for coordinates, check if its been guessed, if not, return those coordinates, or remove coordinates from array and try next one
-            while (alreadyGuessed) {
+            while (alreadyGuessed && this.educatedGuesses.length > 0) {
                 row = this.educatedGuesses[0][0]; //number
                 col = this.uppercaseLetters[this.educatedGuesses[0][1]]; //letter
 
@@ -613,7 +613,8 @@ class Gameboard {
             }
         } else if (
             this.educatedGuesses.length === 0 &&
-            this.temporaryHit.length > 0
+            this.temporaryHit.length > 0 &&
+            (!col || !row)
         ) {
             row = this.temporaryHit[0];
             col = this.uppercaseLetters[this.temporaryHit[0][1]];
@@ -654,14 +655,18 @@ class Gameboard {
             this.temporaryHit = [];
         } else {
             //if no educated guess make a random guess
-            while (alreadyGuessed) {
-                row = Math.floor(Math.random() * 10) + 1; //Numbers
-                col = this.uppercaseLetters[Math.floor(Math.random() * 10) + 1]; //Letters
-
-                alreadyGuessed = this.playersGuesses.includes(`${col}${row}`);
+            if (!col || !row) {
+                do {
+                    row = Math.floor(Math.random() * 10) + 1;
+                    col =
+                        this.uppercaseLetters[
+                            Math.floor(Math.random() * 10) + 1
+                        ];
+                } while (this.playersGuesses.includes(`${col}${row}`));
             }
+            // Fallback to random
         }
-
+        console.log(`Computer guessing: ${col}${row}`);
         return `${col}${row}`;
     }
 
@@ -945,7 +950,7 @@ class DOM {
             let firstClick = null;
 
             function handleGridClicks(event) {
-                if (mode === "commandLine") return; //ignore clicks
+                if (mode === "commandLine") return;
 
                 const cell = event.target;
                 let col = cell.dataset.col;
@@ -953,27 +958,26 @@ class DOM {
                 let colIndex = cell.dataset.colIndex;
                 let rowIndex = cell.dataset.rowIndex;
 
-                if (mode === "grid") {
+                if (mode === "grid" || mode === "hybrid") {
                     cleanup();
                     resolve({ col, row });
                 } else if (mode === "both") {
                     if (!firstClick) {
-                        firstClick = { col, row, colIndex, rowIndex }; //Single click mode
+                        firstClick = { col, row, colIndex, rowIndex };
                     } else {
                         const secondClick = { col, row, colIndex, rowIndex };
                         cleanup();
-                        resolve([firstClick, secondClick]); // returns two clicks
+                        resolve([firstClick, secondClick]);
                     }
                 }
             }
 
             function handleSubmit() {
-                if (mode === "grid") return; //ignore keyboard input
+                if (mode === "grid") return;
 
                 const input = text.value.trim();
                 if (input !== "") {
                     text.value = "";
-                    submitButton.removeEventListener("click", handleSubmit);
                     cleanup();
                     resolve(input);
                 }
@@ -1255,10 +1259,6 @@ class DOM {
         });
     }
 
-    // updateBoard() {}
-
-    // resetDOM() {}
-
     async gameModeDOMMasterSetup() {
         this.setupDOM();
         const selectedGameMode = await this.gameModeDOM();
@@ -1283,7 +1283,7 @@ class DOM {
 
             this.updateBoardDOM(this.player1, this.player1.playerBoard.board);
 
-            // this.gameTurnVsComputerDOM(this.player1, this.player2);
+            this.gameTurnVsComputerDOM(this.player1, this.player2);
         } else if (selectedGameMode === "PVP") {
             this.printMessage("What is player 1's name admiral?");
             playerName = await this.getInput("commandLine");
@@ -1332,7 +1332,8 @@ class DOM {
                     } else if (col === 0) {
                         cell.textContent = headers[row]; // Row headers
                     } else {
-                        cell.textContent = board[col][row]; // Grid content
+                        const cellValue = board[col][row];
+                        cell.textContent = cellValue; // Grid content
                         cell.id = `${headers[row]}${col}`;
                         cell.dataset.col = `${headers[row]}`; //Letter / Column
                         cell.dataset.row = `${col}`; //Number / Row
@@ -1342,6 +1343,14 @@ class DOM {
                             this.receiveInput(cell),
                         );
                         cell.classList.add("coordinate");
+
+                        if (cellValue === "X") {
+                            cell.classList.add("hit");
+                        } else if (cellValue === "O") {
+                            cell.classList.add("miss");
+                        } else if (cellValue !== "~") {
+                            cell.classList.add("shipSquare");
+                        }
                     }
 
                     gridRow.appendChild(cell);
@@ -1372,7 +1381,8 @@ class DOM {
                     } else if (col === 0) {
                         cell.textContent = headers[row]; // Row headers
                     } else {
-                        cell.textContent = board[col][row]; // Grid content
+                        const cellValue = board[col][row];
+                        cell.textContent = cellValue; // Grid content
                         cell.id = `${headers[row]}${col}`;
                         cell.dataset.col = `${headers[row]}`; //Letter / Column
                         cell.dataset.row = `${col}`; //Number / Row
@@ -1382,6 +1392,14 @@ class DOM {
                             this.receiveInput(cell),
                         );
                         cell.classList.add("coordinate");
+
+                        if (cellValue === "X") {
+                            cell.classList.add("hit");
+                        } else if (cellValue === "O") {
+                            cell.classList.add("miss");
+                        } else if (cellValue !== "~") {
+                            cell.classList.add("shipSquare");
+                        }
                     }
 
                     gridRow.appendChild(cell);
@@ -1425,6 +1443,33 @@ class DOM {
         }
     }
 
+    async promptAttackDOM() {
+        return new Promise(async (resolve) => {
+            let finalAnswer;
+            this.printMessage(
+                `Make a guess against your opponent on their board by either typing a coordinate (Example: "A2"). Or by pressing on your board`,
+            );
+            let guess = await this.getInput("hybrid");
+
+            if (typeof guess === "string") {
+                while (guess === "" || !guess.match(/^([A-Z]+)(\d+)$/)) {
+                    this.printMessage(
+                        `Make a guess against your opponent on their board by either typing a coordinate (Example: "A2"). Or by pressing on your board`,
+                    );
+                    guess = await this.getInput("hybrid");
+                }
+                finalAnswer = guess;
+            } else {
+                finalAnswer = `${guess.col}${guess.row}`;
+            }
+
+            console.log(guess);
+            console.log(finalAnswer);
+
+            resolve(finalAnswer);
+        });
+    }
+
     // computerSetup() {
 
     // }
@@ -1432,11 +1477,128 @@ class DOM {
     async gameTurnVsComputerDOM(human, computer) {
         const messages = document.getElementById("messages");
         messages.textContent = "";
+        this.messages = [];
 
-        this.printMessage("Please select the coordinates for your ship");
+        let whosTurn = Math.random() < 0.5 ? human : computer;
+        let gameOver = false;
 
-        human.boardSetupHuman();
+        computer.playerBoard.opponentsBoard = human.playerBoard.board;
+
+        while (!gameOver) {
+            if (whosTurn === human) {
+                // Human's turn
+
+                //print boards
+                this.updateBoardDOM(human, human.playerBoard.opponentsBoard);
+                this.updateBoardDOM(
+                    computer,
+                    computer.playerBoard.opponentsBoard,
+                );
+
+                //human prompt
+                const guess = await this.promptAttackDOM();
+                const result = computer.playerBoard.receiveAttack(guess);
+
+                console.log(result);
+
+                if (result.result === "hit") {
+                    const [col, row] = [
+                        result.coordinates[0],
+                        parseInt(result.coordinates.slice(1)),
+                    ];
+                    const colIndex =
+                        human.playerBoard.uppercaseLetters.indexOf(col);
+                    // human.playerBoard.opponentsBoard[row][colIndex] = "X";
+                    human.playerBoard.opponentsBoard[row][colIndex] = "X";
+                    this.printMessage(`Hit at ${result.coordinates}!`);
+                } else if (result.result === "miss") {
+                    const [col, row] = [
+                        result.coordinates[0],
+                        parseInt(result.coordinates.slice(1)),
+                    ];
+                    const colIndex =
+                        human.playerBoard.uppercaseLetters.indexOf(col);
+                    human.playerBoard.opponentsBoard[row][colIndex] = "O";
+
+                    this.printMessage(`Miss at ${result.coordinates}.`);
+                } else {
+                    this.printMessage("Invalid or already guessed coordinate.");
+                    continue;
+                }
+
+                if (computer.playerBoard.allSunk()) {
+                    this.printMessage("All enemy ships sunk! You win!");
+                    //update boards
+                    this.updateBoardDOM(
+                        human,
+                        human.playerBoard.opponentsBoard,
+                    );
+                    this.updateBoardDOM(
+                        computer,
+                        computer.playerBoard.opponentsBoard,
+                    );
+                    gameOver = true;
+                }
+
+                whosTurn = computer;
+            } else {
+                // Computer's turn
+                const guess = computer.playerBoard.promptAttackComputer();
+                const result = human.playerBoard.receiveAttack(guess);
+
+                if (result.result === "hit") {
+                    const [col, row] = [
+                        result.coordinates[0],
+                        parseInt(result.coordinates.slice(1)),
+                    ];
+                    const colIndex =
+                        computer.playerBoard.uppercaseLetters.indexOf(col);
+                    computer.playerBoard.opponentsBoard[row][colIndex] = "X";
+
+                    //if there are no educated guesses to be made on next attack and there are no new initial guesses, queue up next educated guess coordinate
+                    if (
+                        computer.playerBoard.educatedGuesses.length === 0 &&
+                        computer.playerBoard.temporaryHit.length === 0
+                    ) {
+                        computer.playerBoard.temporaryHit = [row, colIndex];
+                    }
+                    this.printMessage(`Computer hit at ${result.coordinates}!`);
+                } else if (result.result === "miss") {
+                    const [col, row] = [
+                        result.coordinates[0],
+                        parseInt(result.coordinates.slice(1)),
+                    ];
+                    const colIndex =
+                        computer.playerBoard.uppercaseLetters.indexOf(col);
+                    computer.playerBoard.opponentsBoard[row][colIndex] = "O";
+                    this.printMessage(
+                        `Computer missed at ${result.coordinates}.`,
+                    );
+                }
+
+                if (human.playerBoard.allSunk()) {
+                    //update boards
+                    this.updateBoardDOM(
+                        human,
+                        human.playerBoard.opponentsBoard,
+                    );
+                    this.updateBoardDOM(
+                        computer,
+                        computer.playerBoard.opponentsBoard,
+                    );
+
+                    this.printMessage(
+                        "All your ships are sunk! Computer wins!",
+                    );
+
+                    gameOver = true;
+                }
+                whosTurn = human;
+            }
+        }
     }
+
+    // resetDOM() {}
 
     gameTurnPVPDOM(player1, player2) {}
 }
