@@ -1303,7 +1303,7 @@ class DOM {
             await this.humanSetupDOM(this.player1);
             await this.humanSetupDOM(this.player2);
 
-            // this.gameTurnPVPDOM(this.player1, this.player2);
+            this.gameTurnPVPDOM(this.player1, this.player2);
         }
     }
 
@@ -1642,9 +1642,138 @@ class DOM {
         }
     }
 
-    // resetDOM() {}
+    async gameTurnPVPDOM(player1, player2) {
+        const messages = document.getElementById("messages");
+        messages.textContent = "";
+        this.messages = [];
 
-    gameTurnPVPDOM(player1, player2) {}
+        let whosTurn = Math.random() < 0.5 ? player1 : player2;
+        let gameOver = false;
+
+        while (!gameOver) {
+            if (whosTurn === player1) {
+                // Player 1's turn
+                this.updateBoardDOM(
+                    player1,
+                    player1.playerBoard.opponentsBoard,
+                );
+                this.updateBoardDOM(
+                    player2,
+                    player2.playerBoard.opponentsBoard,
+                );
+
+                this.updateShipsDOM(player1);
+                this.updateShipsDOM(player2);
+
+                const guess = await this.promptAttackDOM();
+                const result = player2.playerBoard.receiveAttack(guess);
+
+                if (result.result === "hit") {
+                    const [col, row] = [
+                        result.coordinates[0],
+                        parseInt(result.coordinates.slice(1)),
+                    ];
+                    const colIndex =
+                        player1.playerBoard.uppercaseLetters.indexOf(col);
+                    player1.playerBoard.opponentsBoard[row][colIndex] = "X";
+                    this.printMessage(`Hit at ${result.coordinates}!`);
+                } else if (result.result === "miss") {
+                    const [col, row] = [
+                        result.coordinates[0],
+                        parseInt(result.coordinates.slice(1)),
+                    ];
+                    const colIndex =
+                        player1.playerBoard.uppercaseLetters.indexOf(col);
+                    player1.playerBoard.opponentsBoard[row][colIndex] = "O";
+
+                    this.printMessage(`Miss at ${result.coordinates}.`);
+                } else {
+                    this.printMessage("Invalid or already guessed coordinate.");
+                    continue;
+                }
+
+                if (player2.playerBoard.allSunk()) {
+                    player1.playerBoard.printBoard(
+                        player1.playerBoard.opponentsBoard,
+                    );
+                    player2.playerBoard.printBoard(
+                        player2.playerBoard.opponentsBoard,
+                    );
+
+                    this.updateShipsDOM(player1);
+                    this.updateShipsDOM(player2);
+                    this.printMessage(
+                        `All enemy ships sunk! ${player1.name} wins!`,
+                    );
+                    gameOver = true;
+                }
+                whosTurn = player2;
+            } else if (whosTurn === player2) {
+                // Player 2's turn
+                this.updateBoardDOM(
+                    player1,
+                    player1.playerBoard.opponentsBoard,
+                );
+                this.updateBoardDOM(
+                    player2,
+                    player2.playerBoard.opponentsBoard,
+                );
+
+                this.updateShipsDOM(player1);
+                this.updateShipsDOM(player2);
+
+                const guess = this.promptAttackDOM();
+                const result = player1.playerBoard.receiveAttack(guess);
+
+                if (result.result === "hit") {
+                    const [col, row] = [
+                        result.coordinates[0],
+                        parseInt(result.coordinates.slice(1)),
+                    ];
+                    const colIndex =
+                        player2.playerBoard.uppercaseLetters.indexOf(col);
+                    player2.playerBoard.opponentsBoard[row][colIndex] = "X";
+                    this.printMessage(`Hit at ${result.coordinates}!`);
+                } else if (result.result === "miss") {
+                    const [col, row] = [
+                        result.coordinates[0],
+                        parseInt(result.coordinates.slice(1)),
+                    ];
+                    const colIndex =
+                        player2.playerBoard.uppercaseLetters.indexOf(col);
+                    player2.playerBoard.opponentsBoard[row][colIndex] = "O";
+
+                    this.printMessage(`Miss at ${result.coordinates}.`);
+                } else {
+                    this.printMessage("Invalid or already guessed coordinate.");
+                    continue;
+                }
+
+                if (player1.playerBoard.allSunk()) {
+                    this.printMessage(
+                        `All enemy ships sunk! ${player2.name} wins!`,
+                    );
+
+                    this.updateBoardDOM(
+                        player1,
+                        player1.playerBoard.opponentsBoard,
+                    );
+                    this.updateBoardDOM(
+                        player2,
+                        player2.playerBoard.opponentsBoard,
+                    );
+
+                    this.updateShipsDOM(player1);
+                    this.updateShipsDOM(player2);
+
+                    gameOver = true;
+                }
+                whosTurn = player1;
+            }
+        }
+    }
+
+    // resetDOM() {}
 }
 
 function gameModeTerminal() {
