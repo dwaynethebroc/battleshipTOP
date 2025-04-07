@@ -946,59 +946,71 @@ class DOM {
     async getInput(mode = "both") {
         return new Promise((resolve) => {
             const text = document.getElementById("answer");
-            const submitButton = document.getElementById("submit");
-            const gridCells = document.querySelectorAll(".coordinate");
-
+            const submit = document.getElementById("submit");
+            const cells = document.querySelectorAll(".coordinate");
             let firstClick = null;
 
-            function handleGridClicks(event) {
-                if (mode === "commandLine") return;
+            const handleGrid = (e) => {
+                // if we’re in text‑only or wrong‑player mode, ignore
+                if (mode === "commandLineOnly") return;
+                const cell = e.target;
+                // restrict to the correct board
+                if (
+                    (mode === "player1" && !cell.closest("#player1Board")) ||
+                    (mode === "player2" && !cell.closest("#player2Board"))
+                )
+                    return;
 
-                const cell = event.target;
-                let col = cell.dataset.col;
-                let row = cell.dataset.row;
-                let colIndex = cell.dataset.colIndex;
-                let rowIndex = cell.dataset.rowIndex;
+                const { col, row } = cell.dataset;
 
-                if (mode === "grid" || mode === "hybrid") {
+                if (
+                    mode === "gridOnly" ||
+                    mode === "player1" ||
+                    mode === "player2"
+                ) {
+                    // single‑click grid mode
                     cleanup();
                     resolve({ col, row });
                 } else if (mode === "both") {
+                    // two‑click range mode
                     if (!firstClick) {
-                        firstClick = { col, row, colIndex, rowIndex };
+                        firstClick = cell;
+                        firstClick.classList.add("anchor");
                     } else {
-                        const secondClick = { col, row, colIndex, rowIndex };
                         cleanup();
-                        resolve([firstClick, secondClick]);
+                        firstClick.classList.remove("anchor");
+                        resolve([
+                            {
+                                col: firstClick.dataset.col,
+                                row: firstClick.dataset.row,
+                            },
+                            { col, row },
+                        ]);
                     }
                 }
-            }
+            };
 
-            function handleSubmit() {
-                if (mode === "grid") return;
-
-                const input = text.value.trim();
-                if (input !== "") {
-                    text.value = "";
-                    cleanup();
-                    resolve(input);
-                }
-            }
+            const handleSubmit = () => {
+                if (mode === "gridOnly") return;
+                const val = text.value.trim().toUpperCase();
+                if (!val) return;
+                cleanup();
+                resolve(val);
+            };
 
             function cleanup() {
-                submitButton.removeEventListener("click", handleSubmit);
-                gridCells.forEach((cell) =>
-                    cell.removeEventListener("click", handleGridClicks),
+                submit.removeEventListener("click", handleSubmit);
+                cells.forEach((c) =>
+                    c.removeEventListener("click", handleGrid),
                 );
             }
 
-            if (mode !== "grid") {
-                submitButton.addEventListener("click", handleSubmit);
+            // attach listeners
+            if (mode !== "commandLineOnly") {
+                cells.forEach((c) => c.addEventListener("click", handleGrid));
             }
-            if (mode !== "commandLine") {
-                gridCells.forEach((cell) =>
-                    cell.addEventListener("click", handleGridClicks),
-                );
+            if (mode !== "gridOnly") {
+                submit.addEventListener("click", handleSubmit);
             }
         });
     }
@@ -1473,31 +1485,30 @@ class DOM {
         }
     }
 
-    async promptAttackDOM() {
-        return new Promise(async (resolve) => {
-            let finalAnswer;
-            this.printMessage(
-                `Make a guess against your opponent on their board by either typing a coordinate (Example: "A2"). Or by pressing on your board`,
-            );
-            let guess = await this.getInput("hybrid");
+    async promptAttackDOM(playerMode) {
+        // Show instructions
+        this.printMessage(
+            `Make a guess against your opponent on their board by either typing a coordinate (Example: "A2") or by pressing on your board.`,
+        );
 
-            if (typeof guess === "string") {
-                while (guess === "" || !guess.match(/^([A-Z]+)(\d+)$/)) {
-                    this.printMessage(
-                        `Make a guess against your opponent on their board by either typing a coordinate (Example: "A2"). Or by pressing on your board`,
-                    );
-                    guess = await this.getInput("hybrid");
-                }
-                finalAnswer = guess;
-            } else {
-                finalAnswer = `${guess.col}${guess.row}`;
-            }
+        // Get raw input (restricted to the right board or command line)
+        const raw = await this.getInput(playerMode);
 
-            console.log(guess);
-            console.log(finalAnswer);
+        // Normalize to string
+        const guess =
+            typeof raw === "string"
+                ? raw.trim().toUpperCase()
+                : `${raw.col}${raw.row}`;
 
-            resolve(finalAnswer);
-        });
+        // Validate A–J and 1–10
+        if (!/^([A-J])([1-9]|10)$/.test(guess)) {
+            this.printMessage("Invalid coordinate. Try again.");
+            // Recursively re-prompt until valid
+            return this.promptAttackDOM(playerMode);
+        }
+
+        // Return the clean string
+        return guess;
     }
 
     // computerSetup() {
@@ -1530,7 +1541,7 @@ class DOM {
                 this.updateShipsDOM(computer);
 
                 //human prompt
-                const guess = await this.promptAttackDOM();
+                const guess = await this.promptAttackDOM("player1");
                 const result = computer.playerBoard.receiveAttack(guess);
 
                 console.log(result);
@@ -1665,7 +1676,7 @@ class DOM {
                 this.updateShipsDOM(player1);
                 this.updateShipsDOM(player2);
 
-                const guess = await this.promptAttackDOM();
+                const guess = await this.promptAttackDOM("player1");
                 const result = player2.playerBoard.receiveAttack(guess);
 
                 if (result.result === "hit") {
@@ -1722,7 +1733,7 @@ class DOM {
                 this.updateShipsDOM(player1);
                 this.updateShipsDOM(player2);
 
-                const guess = this.promptAttackDOM();
+                const guess = await this.promptAttackDOM("player2");
                 const result = player1.playerBoard.receiveAttack(guess);
 
                 if (result.result === "hit") {
