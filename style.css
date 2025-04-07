@@ -35,6 +35,17 @@
     background-color: lightblue !important;
 }
 
+.title{
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
+
+    font-size: 7px;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
 
 
 div {
@@ -44,6 +55,10 @@ div {
 button {
     font-size: 10px;
     text-align: center;
+
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
 }
 
 button:hover {
@@ -56,10 +71,19 @@ form {
     display: flex;
 }
 
+body{
+    background-color: black;
+}
+
 .header{
     display: flex;
     justify-content: center;
     font-size: 20px;
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
+
+    padding: 10px;
 }
 
 .name{
@@ -76,6 +100,9 @@ form {
     flex-direction: column;
     justify-content: center;
     width: 100%;
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
 }
 
 .board1 {
@@ -83,6 +110,7 @@ form {
     flex-direction: row;
     justify-content: center;
     width: 100%;
+
 } 
 
 .board2 {
@@ -90,15 +118,19 @@ form {
     flex-direction: row;
     justify-content: center;
     width: 100%;
+
 } 
 
 .cell{
     display: flex;
     height: 25px;
     width: 30px;
-    border: 2px black solid;
     justify-content: center;
     align-items: center;
+
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
 }
 
 .cell:hover {
@@ -112,6 +144,10 @@ form {
     justify-content: space-around;
     flex-wrap: 1;
     padding: 10px;
+
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
 }
 
 .controls {
@@ -121,6 +157,17 @@ form {
     align-items: center;
     gap: 10px;
     width: 100%;
+
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
+    padding: 10px;
+}
+
+.ship {
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
 }
 
 .commandLine{
@@ -128,6 +175,10 @@ form {
     flex-direction: column;
     padding: 10px;
     width: 100%;
+
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
 }
 
 .messages{
@@ -157,12 +208,19 @@ form {
     flex-direction: row;
     gap: 2px;
     padding: 2px;
+
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
 }
 
 .healthBox {
     background-color: green;
     height: 20px;
     width: 50px;
+
+    border: 1px dotted white;
+    color: white;
 }
 
 #promptLine{
@@ -184,10 +242,13 @@ form {
 
 .message {
     display: flex;
-    border: 2px solid black;
     padding: 5px;
 
     font-size: 15px;
+
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
 }
 
 .hit{
@@ -217,6 +278,15 @@ input#answer{
     height: 1rem;
     display: flex;
     justify-content: right;
+
+    background-color: white;
+    color: black;
+}
+
+input#submit{
+    border: 1px dotted white;
+    background-color: black;
+    color: white;
 }
 
 button#control1{
