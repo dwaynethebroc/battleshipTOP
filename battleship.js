@@ -946,6 +946,7 @@ class DOM {
     async getInput(mode = "both") {
         return new Promise((resolve) => {
             const text = document.getElementById("answer");
+            text.value = "";
             const submit = document.getElementById("submit");
             const cells = document.querySelectorAll(".coordinate");
             let firstClick = null;
@@ -1312,7 +1313,17 @@ class DOM {
             this.player1 = new Player("human", playerName, "PVP");
             this.player2 = new Player("human", playerName2, "PVP");
 
+            this.printMessage(
+                `Give the computer to ${playerName} for placing ships. No peeking admiral!`,
+            );
             await this.humanSetupDOM(this.player1);
+            this.updateBoardDOM(
+                this.player1,
+                this.player1.playerBoard.opponentsBoard,
+            );
+            this.printMessage(
+                `Give the computer to ${playerName2} for placing ships. No peeking admiral!`,
+            );
             await this.humanSetupDOM(this.player2);
 
             this.gameTurnPVPDOM(this.player1, this.player2);
@@ -1676,6 +1687,8 @@ class DOM {
                 this.updateShipsDOM(player1);
                 this.updateShipsDOM(player2);
 
+                this.printMessage(`${player1.name.toUpperCase()}'s TURN`);
+
                 const guess = await this.promptAttackDOM("player1");
                 const result = player2.playerBoard.receiveAttack(guess);
 
@@ -1732,6 +1745,8 @@ class DOM {
 
                 this.updateShipsDOM(player1);
                 this.updateShipsDOM(player2);
+
+                this.printMessage(`${player2.name.toUpperCase()}'s TURN`);
 
                 const guess = await this.promptAttackDOM("player2");
                 const result = player1.playerBoard.receiveAttack(guess);
