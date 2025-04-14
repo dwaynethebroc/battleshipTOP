@@ -38,7 +38,7 @@
 .title{
     border: 1px dotted white;
     background-color: black;
-    color: white;
+    color: #00E626;
 
     font-size: 7px;
     display: flex;
@@ -81,7 +81,7 @@ body{
     font-size: 20px;
     border: 1px dotted white;
     background-color: black;
-    color: white;
+    color: #00E626;
 
     padding: 10px;
 }
@@ -102,7 +102,7 @@ body{
     width: 100%;
     border: 1px dotted white;
     background-color: black;
-    color: white;
+    color: #00E626;
 }
 
 .board1 {
@@ -147,7 +147,7 @@ body{
 
     border: 1px dotted white;
     background-color: black;
-    color: white;
+    color: #00E626;
 }
 
 .controls {
@@ -160,7 +160,7 @@ body{
 
     border: 1px dotted white;
     background-color: black;
-    color: white;
+    color: #00E626;
     padding-top: 5px;
     padding-bottom: 5px;
 }
@@ -168,7 +168,7 @@ body{
 .ship {
     border: 1px dotted white;
     background-color: black;
-    color: white;
+    color: #00E626;
 }
 
 .commandLine{
@@ -212,7 +212,7 @@ body{
 
     border: 1px dotted white;
     background-color: black;
-    color: white;
+    color: #00E626;
 }
 
 .healthBox {
@@ -221,7 +221,7 @@ body{
     width: 50px;
 
     border: 1px dotted white;
-    color: white;
+    color: #00E626;
 }
 
 #promptLine{
@@ -249,7 +249,7 @@ body{
 
     border: 1px dotted white;
     background-color: black;
-    color: white;
+    color: #00E626;
 }
 
 .hit{
@@ -270,7 +270,7 @@ body{
 .footer {
     border: 1px dotted white;
     background-color: black;
-    color: white;
+    color: #00E626;
 
     font-size: 12px;
     display: flex;
@@ -284,7 +284,7 @@ a {
     display: flex;
     border: 1px dotted white;
     background-color: white;
-    color: white;
+    color: #00E626;
 
     height: 1.5rem;
     border-radius: 50px;

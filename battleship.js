@@ -795,7 +795,7 @@ class DOM {
                     );
                     cell.classList.add("coordinate");
                 }
-
+                cell.style.color = "#00E626";
                 gridRow.appendChild(cell);
             }
             container1.appendChild(gridRow);
@@ -833,6 +833,7 @@ class DOM {
                     cell.classList.add("coordinate");
                 }
 
+                cell.style.color = "#00E626";
                 gridRow.appendChild(cell);
             }
             container2.appendChild(gridRow);
