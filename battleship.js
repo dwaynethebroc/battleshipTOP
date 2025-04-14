@@ -1182,7 +1182,19 @@ class DOM {
                 endCoordinate,
             );
 
-            while (!lengthsMatch || outOfBounds || alreadyPlaced) {
+            let orientation = player.playerBoard.orientation(
+                startingCoordinate,
+                endCoordinate,
+            );
+
+            let isDiagonal = orientation === "diagonal";
+
+            while (
+                !lengthsMatch ||
+                outOfBounds ||
+                alreadyPlaced ||
+                isDiagonal
+            ) {
                 this.errorMessageDOM(
                     match,
                     lengthsMatch,
@@ -1218,6 +1230,12 @@ class DOM {
                     startingCoordinate,
                     endCoordinate,
                 );
+
+                orientation = player.playerBoard.orientation(
+                    startingCoordinate,
+                    endCoordinate,
+                );
+                isDiagonal = orientation === "diagonal";
             }
 
             // Clear highlights once ship is placed
@@ -1226,7 +1244,7 @@ class DOM {
             );
             this.tempHighlightedCells = [];
 
-            let orientation = player.playerBoard.orientation(
+            orientation = player.playerBoard.orientation(
                 startingCoordinate,
                 endCoordinate,
             );
@@ -1247,6 +1265,26 @@ class DOM {
 
         console.log(this.player1.playerBoard.board);
         console.log(this.player2.playerBoard.board);
+    }
+
+    showFinalBoards(player1, player2) {
+        // Player 1's board with Player 2's guesses
+        this.updateBoardDOM(
+            player1,
+            player1.playerBoard.board,
+            player2.playerBoard.playersGuesses,
+        );
+
+        // Player 2's board with Player 1's guesses
+        this.updateBoardDOM(
+            player2,
+            player2.playerBoard.board,
+            player1.playerBoard.playersGuesses,
+        );
+
+        this.printMessage(
+            "Game Over! Here's how each player's board looked with opponent guesses:",
+        );
     }
 
     async promptShipDOM(ship) {
@@ -1331,7 +1369,7 @@ class DOM {
         }
     }
 
-    updateBoardDOM(player, board) {
+    updateBoardDOM(player, board, overlayGuesses = []) {
         //determine which player it is, then update the correct board and display it
         const headers = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
@@ -1359,7 +1397,24 @@ class DOM {
                         cell.textContent = headers[row]; // Row headers
                     } else {
                         const cellValue = board[col][row];
-                        cell.textContent = cellValue; // Grid content
+                        const coord = `${headers[row]}${col}`;
+                        if (overlayGuesses.includes(coord)) {
+                            const occupied =
+                                player.playerBoard.occupiedCells.includes(
+                                    coord,
+                                );
+
+                            if (occupied) {
+                                cell.textContent = "X";
+                                cell.classList.add("hit");
+                            } else {
+                                cell.textContent = "O";
+                                cell.classList.add("miss");
+                            }
+                        } else {
+                            cell.textContent = cellValue; // Only apply original cell content if not overwritten by guess
+                        }
+
                         cell.id = `${headers[row]}${col}`;
                         cell.dataset.col = `${headers[row]}`; //Letter / Column
                         cell.dataset.row = `${col}`; //Number / Row
@@ -1379,6 +1434,7 @@ class DOM {
                         }
                     }
 
+                    cell.style.color = "#00E626";
                     gridRow.appendChild(cell);
                 }
                 container1.appendChild(gridRow);
@@ -1408,7 +1464,23 @@ class DOM {
                         cell.textContent = headers[row]; // Row headers
                     } else {
                         const cellValue = board[col][row];
-                        cell.textContent = cellValue; // Grid content
+                        const coord = `${headers[row]}${col}`;
+                        if (overlayGuesses.includes(coord)) {
+                            const occupied =
+                                player.playerBoard.occupiedCells.includes(
+                                    coord,
+                                );
+
+                            if (occupied) {
+                                cell.textContent = "X";
+                                cell.classList.add("hit");
+                            } else {
+                                cell.textContent = "O";
+                                cell.classList.add("miss");
+                            }
+                        } else {
+                            cell.textContent = cellValue; // Only apply original cell content if not overwritten by guess
+                        }
                         cell.id = `${headers[row]}${col}`;
                         cell.dataset.col = `${headers[row]}`; //Letter / Column
                         cell.dataset.row = `${col}`; //Number / Row
@@ -1428,6 +1500,7 @@ class DOM {
                         }
                     }
 
+                    cell.style.color = "#00E626";
                     gridRow.appendChild(cell);
                 }
                 container2.appendChild(gridRow);
@@ -1730,6 +1803,8 @@ class DOM {
                     this.printMessage(
                         `All enemy ships sunk! ${player1.name} wins!`,
                     );
+
+                    this.showFinalBoards(player1, player2);
                     gameOver = true;
                 }
                 whosTurn = player2;
@@ -1792,6 +1867,8 @@ class DOM {
 
                     this.updateShipsDOM(player1);
                     this.updateShipsDOM(player2);
+
+                    this.showFinalBoards(player1, player2);
 
                     gameOver = true;
                 }
